@@ -255,12 +255,12 @@ class MeasurementList:
             self.values = [Measurement(measurement.value,measurement.uncertainty,self.unit) for measurement in values]
 
         else:
-            if(uncertainty == 0):
-                mean = sum(values) / len(values) 
-                cas = [ (value - mean) ** 2 for value in values ]
-                self.uncertainty = math.sqrt( 1 / len(values) * sum(cas) )
-            else:
-                self.uncertainty = uncertainty
+            ## standard deviation if uncertainty is 0 is disabled
+            # if(uncertainty == 0):
+            #     mean = sum(values) / len(values) 
+            #     cas = [ (value - mean) ** 2 for value in values ]
+            #     self.uncertainty = math.sqrt( 1 / len(values) * sum(cas) )
+            self.uncertainty = uncertainty
 
             self.unit = unit if (isinstance(unit,Unit)) else Unit(unit)
             self.values = [ Measurement(value,self.uncertainty,self.unit) for value in values ]

@@ -68,13 +68,14 @@ print(200 - heights)
 With two `MeasurementList` instances, they can be linearly regressed with the `LinearRegression` class.
 ```python
 voltages = MeasurementList([1.3,3,5,7,8.5,10],0,"V")
-temperatures = MeasurementList([23,55,67,82,88,96],0,"C")
+temperatures = MeasurementList([23,55,67,82,88,96],20,"C")
 
 lobf = LinearRegression(voltages,temperatures)
 
 print(lobf)
 # 
 ```
+
 
 For LaTeX template file output, the `Document` class is used. Argument names are not required, they are shown here only for demonstration.
 ```python
