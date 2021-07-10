@@ -8,6 +8,5 @@
 /*.egg-info
 
 # output files
-/figures
 /tex
 /.vscode
