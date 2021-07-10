@@ -5,7 +5,7 @@ import pathlib
 DIR = pathlib.Path(__file__).parent
 README = (DIR / 'README.md').read_text()
 
-VERSION = '0.0.1'
+VERSION = '0.0.4'
 DESCRIPTION = 'Lab report data analysis and LaTeX file generation'
 
 setuptools.setup(
@@ -24,7 +24,5 @@ setuptools.setup(
         "Topic :: Scientific/Engineering :: Physics",
         "License :: OSI Approved :: MIT License",
     ],
-    package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src"),
     python_requires=">=3.6",
 )
