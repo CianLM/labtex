@@ -2,6 +2,7 @@ from .linear import LinearRegression
 from .measurement import MeasurementList
 from typing import List, Union
 
+import os
 
 class Document:
     "A class for LaTeX template document creation with tables and graphs already inserted."
@@ -164,17 +165,23 @@ class Document:
         eq.savefig(Document.graphfolder + filename,title,xnameandsymbol,ynameandsymbol)
         print(f"labtex: Wrote to '{Document.graphfolder + filename}.png'.")
 
-        if(Document.texfolder != '.'): # assuming the folder is a subfolder
+        if(Document.graphfolder != '.'): # assuming the folder is a subfolder
             graph = graph.replace("!filename","../" + Document.graphfolder +  filename)
         else:
             graph = graph.replace("!filename", Document.graphfolder + filename)
 
         self.document = self.document.replace("!graph",graph)
 
+        if (not os.path.exists(Document.graphfolder)):
+            os.makedirs(Document.graphfolder)
+
     def save(self,filename: str ="labdocument"):
         "Save the document to 'filename.tex'."
 
         self.document = self.document.replace("!table","").replace("!graph","")
+
+        if(not os.path.exists(Document.texfolder)):
+            os.makdirs(Document.texfolder)
 
         with open(Document.texfolder + filename + '.tex','w') as outputfile:
             outputfile.write(self.document)

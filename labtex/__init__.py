@@ -4,4 +4,4 @@ from labtex.linear import LinearRegression
 from labtex.document import Document
 
 
-__version__ = '0.0.4'
+__version__ = '0.1.2'

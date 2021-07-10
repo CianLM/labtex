@@ -1,9 +1,9 @@
 import unittest
 
-from linear import LinearRegression
-from document import Document
-from measurement import Measurement, MeasurementList
-from unit import Unit
+# requires
+# `pip3 install labtex`
+#v 0.1.0 or above
+from labtex import *
 
 # Unit Class
 class TestUnitClass(unittest.TestCase):
@@ -22,8 +22,8 @@ class TestUnitClass(unittest.TestCase):
 
     def test_maxparsing(self):
         self.assertEqual( 
-            repr(Unit("ng^-5us^-4mA^-3cK^-2C^-1kJ^1MV^2N^3GW^4T^5Pa^6Hzm^101")) \
-            == "ng^-5 us^-4 mA^-3 cK^-2 C^-1 kJ^1 MV^2 N^3 GW^4 T^5 Pa^6 Hz m^101"
+            repr(Unit("ng^-5us^-4mA^-3cK^-2C^-1kJ^1MV^2N^3GW^4T^5Pa^6Hzm^101")),
+            "ng^-5 us^-4 mA^-3 cK^-2 C^-1 kJ^1 MV^2 N^3 GW^4 T^5 Pa^6 Hz m^101"
     )
 
 
@@ -57,17 +57,17 @@ class TestMeasurementClass(unittest.TestCase):
         self.assertEqual( repr(3 / z), "0.0096 ± 0.0003 V^-1")
 
     def test_exponentiation(self):
-        self.assertTrue( (x * x) == repr(x ** 2) == "1.2 ± 0.7 m^2")
-        self.assertEqual( (2 ** x), "2.1 ± 0.6 ")
+        self.assertTrue( repr(x * x) == repr(x ** 2) == "1.2 ± 0.7 m^2")
+        self.assertEqual( repr(2 ** x), "2.1 ± 0.6 ")
 
     def test_functions(self):
-        self.assertEqual( (Measurement.sin(x)), "0.9 ± 0.1 ")
-        self.assertEqual( (Measurement.cos(x)), "0.5 ± 0.3 ")
-        self.assertEqual( (Measurement.tan(x)), "2 ± 1 ")
-        self.assertEqual( (Measurement.log(x)), "0.1 ± 0.3 ")
-        self.assertEqual( (Measurement.asin(x/2)), "0.6 ± 0.2 ")
-        self.assertEqual( (Measurement.acos(x/2)), "1.0 ± 0.2 ")
-        self.assertEqual( (Measurement.atan(x/2)), "0.5 ± 0.2 ")
+        self.assertEqual( repr(Measurement.sin(x)), "0.9 ± 0.1 ")
+        self.assertEqual( repr(Measurement.cos(x)), "0.5 ± 0.3 ")
+        self.assertEqual( repr(Measurement.tan(x)), "2 ± 1 ")
+        self.assertEqual( repr(Measurement.log(x)), "0.1 ± 0.3 ")
+        self.assertEqual( repr(Measurement.asin(x/2)), "0.6 ± 0.2 ")
+        self.assertEqual( repr(Measurement.acos(x/2)), "1.0 ± 0.2 ")
+        self.assertEqual( repr(Measurement.atan(x/2)), "0.5 ± 0.2 ")
 
 
 
@@ -166,8 +166,8 @@ class TestMeasurementandListInteractions(unittest.TestCase):
         ) 
 
 # Two MeasurementLists to be used in the rest of the tests
-# voltages = MeasurementList([1.33333,3,5,7,8.5,10],0,"V")
-# temperatures = MeasurementList([23,55,67,82,88,96],0,"C")
+voltages = MeasurementList([1.33333,3,5,7,8.5,10],0,"V")
+temperatures = MeasurementList([23,55,67,82,88,96],0,"C")
 
 
 
@@ -175,40 +175,35 @@ class TestMeasurementandListInteractions(unittest.TestCase):
 # Linear Regression
 
 # eq = LinearRegression(voltages,temperatures)
-# eq.savefig("figures/test",
-#     "Voltage, V vs Temperature, T",
-#     "Voltage, V",
-#     "Temperature, T"
-# )
+# print(eq)
 
 
 
-# # Latex template creation
-# doc = Document("Testing","Cian")
-# doc.table(
-#     ["Voltage, V","Temperature, T"],
-#     [voltages,temperatures],
-#     ["Variables","Data"],
-#     "Test Caption",
-#     "sideways"
-#     )
+# Latex template creation
+doc = Document(title = "Lab Report Template",author = "CianLM")
+doc.table(
+    listheads = ["Voltage, V","Temperature, T"],
+    data = [voltages,temperatures],
+    # headers = ["Variables","Data"],
+    caption = "Voltage Temperature Correlation"
+)
 
-# doc.table(
-#     ["Voltage, V","Temperature, T"],
-#     [voltages,temperatures],
-#     ["Variables","Data"],
-#     "Test Caption",
-#     "upright"
-#     )
+doc.table(
+    listheads = ["Voltage, V","Temperature, T"],
+    data = [voltages,temperatures],
+    caption = "Voltage Temperature Correlation",
+    style = "upright"
+)
 
-# doc.graph(
-#     [voltages,temperatures],
-#     "Test Title",
-#     "Voltage, V", "Temperature, T",
-#     "Test Caption"
-# )
+doc.graph(
+    data = [voltages,temperatures],
+    title = "Voltage Temperature Correlation",
+    xnameandsymbol = "Voltage, V",
+    ynameandsymbol = "Temperature, T",
+    caption = "Linear Regression of Voltage and Temperature"
+)
 
-# doc.save("test")
+doc.save("test")
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

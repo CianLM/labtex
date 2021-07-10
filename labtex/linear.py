@@ -1,9 +1,9 @@
 
 from .measurement import Measurement, MeasurementList
 
-# import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt 
 
-# plt.style.use('seaborn-whitegrid')
+plt.style.use('seaborn-whitegrid')
 
 
 class LinearRegression:
@@ -33,17 +33,17 @@ class LinearRegression:
 
         # Line of best fit parameters
         self.lobf =  {
-            "m": Measurement(m.value,Delta_m,m.unit),
-            "c": Measurement(c.value,Delta_c,c.unit)
+            "m": Measurement(m.value,Delta_m.value,m.unit),
+            "c": Measurement(c.value,Delta_c.value,c.unit)
         }
 
     def __repr__(self):
         return f"{self.lobf['m']}{' + ' if self.lobf['c'].value > 0 else ' '}{self.lobf['c']}"
 
-    # def savefig(self,filename : str = "figure", title: str = "", xlabel : str = "", ylabel: str = ""):
-    #     plt.errorbar(self.x.tolist(),self.y.tolist(),yerr = self.y.uncertainty,fmt='o')
-    #     plt.plot(self.x.tolist(),(self.x*self.lobf["m"].value+self.lobf["c"].value).tolist())
-    #     plt.title(title)
-    #     plt.xlabel(xlabel + f", ({self.x.unit})")
-    #     plt.ylabel(ylabel + f", ({self.y.unit})")
-    #     plt.savefig(filename)
+    def savefig(self,filename : str = "figure", title: str = "", xlabel : str = "", ylabel: str = ""):
+        plt.errorbar(self.x.tolist(),self.y.tolist(),yerr = self.y.uncertainty,fmt='o')
+        plt.plot(self.x.tolist(),(self.x*self.lobf["m"].value+self.lobf["c"].value).tolist())
+        plt.title(title)
+        plt.xlabel(xlabel + f", ({self.x.unit})")
+        plt.ylabel(ylabel + f", ({self.y.unit})")
+        plt.savefig(filename)
