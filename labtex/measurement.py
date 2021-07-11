@@ -246,7 +246,7 @@ class Measurement:
 
 class MeasurementList:
     "An extension of the measurement class to take list values."
-    def __init__(self,values: Union[List[float],List[Measurement]], uncertainty: float = 0, unit: Union[Unit,str] = ""):
+    def __init__(self,values: Union[List[float],List[Measurement]], uncertainty: float = math.nan, unit: Union[Unit,str] = ""):
         
         if (all( isinstance(value,Measurement) for value in values )):
             self.uncertainty = max(value.uncertainty for value in values)
@@ -255,12 +255,13 @@ class MeasurementList:
             self.values = [Measurement(measurement.value,measurement.uncertainty,self.unit) for measurement in values]
 
         else:
-            ## standard deviation if uncertainty is 0 is disabled
-            # if(uncertainty == 0):
-            #     mean = sum(values) / len(values) 
-            #     cas = [ (value - mean) ** 2 for value in values ]
-            #     self.uncertainty = math.sqrt( 1 / len(values) * sum(cas) )
-            self.uncertainty = uncertainty
+            # Take sigma/sqrt(n) if uncertainty is not given
+            if(uncertainty == math.nan):
+                mean = sum(values) / len(values) 
+                cas = [ (value - mean) ** 2 for value in values ]
+                self.uncertainty = math.sqrt( 1 / len(values) * sum(cas) )
+            else:
+                self.uncertainty = uncertainty
 
             self.unit = unit if (isinstance(unit,Unit)) else Unit(unit)
             self.values = [ Measurement(value,self.uncertainty,self.unit) for value in values ]
@@ -396,41 +397,41 @@ class MeasurementList:
     @staticmethod
     def sin(x):
         return MeasurementList(
-            [math.sin(measurement.value) for measurement in x.values]
+            [Measurement.sin(measurement) for measurement in x.values]
         )
 
     @staticmethod
     def cos(x):
         return MeasurementList(
-            [math.cos(measurement.value) for measurement in x.values]
+            [Measurement.cos(measurement) for measurement in x.values]
         )
 
     @staticmethod
     def tan(x):
         return MeasurementList(
-            [math.tan(measurement.value) for measurement in x.values]
+            [Measurement.tan(measurement) for measurement in x.values]
         )
 
     @staticmethod
     def log(x):
         return MeasurementList(
-            [math.log(measurement.value) for measurement in x.values]
+            [Measurement.log(measurement) for measurement in x.values]
         )
 
     @staticmethod
     def asin(x):
         return MeasurementList(
-            [math.asin(measurement.value) for measurement in x.values]
+            [Measurement.asin(measurement) for measurement in x.values]
         )
     
     @staticmethod
     def acos(x):
         return MeasurementList(
-            [math.acos(measurement.value) for measurement in x.values]
+            [Measurement.acos(measurement) for measurement in x.values]
         )
 
     @staticmethod
     def atan(x):
         return MeasurementList(
-            [math.atan(measurement.value) for measurement in x.values]
+            [Measurement.atan(measurement) for measurement in x.values]
         )

@@ -16,26 +16,28 @@ I wrote this package with the intention of providing a single solution to the re
 
 ## Installation
 
+Using `pip` or `pip3` the latest release can be installed with
 ```
 pip3 install labtex
 ```
 
 ## Usage
 
-For ease of use, you can import the package globally with
+For ease of use, you can import the package into your file's global namespace with
 ```python
 from labtex import *
 ```
 The rest of this section will assume the package is imported in this way. Alternatively do `import labtex as lt`.
 
-Single measurements can be instantiated with `Measurement(value,uncertainty,unit)`.
+Single measurements can be instantiated with `Measurement(value,uncertainty,unit)` where unit is a string that will be parsed.
 ```python
 x = Measurement(1.1,0.3,"m")
 y = Measurement(2.22,0.4,"m")
 z = Measurement(314,10,"V")
 ```
+Note that this unit parsing supports all common units, prefixes and powers of units.
 
-Measurement instances support all operations and math functions with the error and units automatically propagated. Some examples are shown below.
+Measurement instances support all operations (`+-*/` and `**`) as well as math functions with the error and units automatically propagated. Some examples are shown below.
 ```python
 print(x)
 # 1.1 ± 0.3 m
@@ -73,8 +75,9 @@ temperatures = MeasurementList([23,55,67,82,88,96],20,"C")
 lobf = LinearRegression(voltages,temperatures)
 
 print(lobf)
-# 
+# 8 ± 1 C V^-1 + 23 ± 6 C
 ```
+Observe that printing all `Measurement` and `MeasurementList` instances rounds the value to the largest sigfig of the error, as is convention.
 
 
 For LaTeX template file output, the `Document` class is used. Argument names are not required, they are shown here only for demonstration.

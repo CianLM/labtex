@@ -1,9 +1,11 @@
 import unittest
 
-# requires
-# `pip3 install labtex`
-#v 0.1.0 or above
+# from unit import Unit
+# from measurement import Measurement, MeasurementList
+# from linear import LinearRegression
+# from document import Document
 from labtex import *
+
 
 # Unit Class
 class TestUnitClass(unittest.TestCase):
@@ -71,7 +73,7 @@ class TestMeasurementClass(unittest.TestCase):
 
 
 
-heights = MeasurementList([185,183,182,194,184,177],0,"cm")
+heights = MeasurementList([185,183,182,194,184,177],5,"cm")
 
 class TestMeasurementListClass(unittest.TestCase):
 
@@ -113,28 +115,28 @@ class TestMeasurementListClass(unittest.TestCase):
 
     def test_functions(self):
         self.assertEqual(
-            repr(MeasurementList.sin(heights)), "[0.3, 0.7, -0.2, -0.7, 1.0, 0.9] ± 0.6 "
+            repr(MeasurementList.sin(heights)), "[0, 1, 0, -1, 1, 1] ± 4 "
         )
         self.assertEqual(
-            repr(MeasurementList.cos(heights)), "[-0.9, 0.7, 1.0, 0.7, -0.2, 0.5] ± 0.7 "
+            repr(MeasurementList.cos(heights)), "[-1, 1, 1, 1, 0, 0] ± 4 "
         )
         self.assertEqual(
-            repr(MeasurementList.tan(heights)), "[0, 1, 0, -1, -5, 2] ± 2 "
+            repr(MeasurementList.tan(heights)), "[0, 0, 0, 0, 0, 0] ± 100 "
         )
         self.assertEqual(
             repr(MeasurementList.log(heights)), "[5.22, 5.21, 5.2, 5.27, 5.21, 5.18] ± 0.03 "
         )
         self.assertEqual(
-            repr(MeasurementList.asin(heights/200)), "[1.18, 1.16, 1.14, 1.33, 1.17, 1.09] ± 0.07 "
+            repr(MeasurementList.asin(heights/200)), "[1.2, 1.2, 1.1, 1.3, 1.2, 1.1] ± 0.1 "
         )
         self.assertEqual(
-            repr(MeasurementList.acos(heights/200)), "[0.39, 0.42, 0.43, 0.25, 0.4, 0.48] ± 0.07 "
+            repr(MeasurementList.acos(heights/200)), "[0.4, 0.4, 0.4, 0.2, 0.4, 0.5] ± 0.1 "
         )
         self.assertEqual(
-            repr(MeasurementList.atan(heights/200)), "[0.75, 0.74, 0.74, 0.77, 0.74, 0.72] ± 0.01 "
+            repr(MeasurementList.atan(heights/200)), "[0.7, 0.7, 0.7, 0.8, 0.7, 0.7] ± 0.1 "
         )
 
-#Measurement and MeasurementList Interactios 
+#Measurement and MeasurementList Interactions 
 t = Measurement(5,0.1,"cm")
 
 class TestMeasurementandListInteractions(unittest.TestCase):
@@ -166,8 +168,8 @@ class TestMeasurementandListInteractions(unittest.TestCase):
         ) 
 
 # Two MeasurementLists to be used in the rest of the tests
-voltages = MeasurementList([1.33333,3,5,7,8.5,10],0,"V")
-temperatures = MeasurementList([23,55,67,82,88,96],0,"C")
+voltages = MeasurementList([1.33333,3,5,7,8.5,10],1,"V")
+temperatures = MeasurementList([23,55,67,82,88,96],5,"C")
 
 
 
@@ -180,30 +182,34 @@ temperatures = MeasurementList([23,55,67,82,88,96],0,"C")
 
 
 # Latex template creation
-doc = Document(title = "Lab Report Template",author = "CianLM")
-doc.table(
-    listheads = ["Voltage, V","Temperature, T"],
-    data = [voltages,temperatures],
-    # headers = ["Variables","Data"],
-    caption = "Voltage Temperature Correlation"
-)
+# doc = Document(title = "Lab Report Template",author = "CianLM")
 
-doc.table(
-    listheads = ["Voltage, V","Temperature, T"],
-    data = [voltages,temperatures],
-    caption = "Voltage Temperature Correlation",
-    style = "upright"
-)
+# print(MeasurementList.sin(voltages))
 
-doc.graph(
-    data = [voltages,temperatures],
-    title = "Voltage Temperature Correlation",
-    xnameandsymbol = "Voltage, V",
-    ynameandsymbol = "Temperature, T",
-    caption = "Linear Regression of Voltage and Temperature"
-)
 
-doc.save("test")
+# doc.table(
+#     listheads = ["Voltage, V","Temperature, T"],
+#     data = [voltages,temperatures],
+#     # headers = ["Variables","Data"],
+#     caption = "Voltage Temperature Correlation"
+# )
+
+# doc.table(
+#     listheads = ["Voltage, V","Temperature, T"],
+#     data = [voltages,temperatures],
+#     caption = "Voltage Temperature Correlation",
+#     style = "upright"
+# )
+
+# doc.graph(
+#     data = [voltages,temperatures],
+#     title = "Voltage Temperature Correlation",
+#     xnameandsymbol = "Voltage, V",
+#     ynameandsymbol = "Temperature, T",
+#     caption = "Linear Regression of Voltage and Temperature"
+# )
+
+# doc.save("test")
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

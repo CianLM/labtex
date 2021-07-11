@@ -1,5 +1,6 @@
 from .linear import LinearRegression
 from .measurement import MeasurementList
+
 from typing import List, Union
 
 import os
