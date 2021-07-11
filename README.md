@@ -158,7 +158,9 @@ doc.graph(
 This generates the graph below and saves it to `figures/graph1.png`. If you want your graphs elsewhere than `figures/`, you may change `Document.graphfolder` at your convenience.
 
 <p align="center">
+    <a>
         <img src="https://github.com/CianLM/labtex/raw/master/figures/graph1.png">
+    </a>
 </p>
 Once you have added all your tables and graphs to the `doc` object, you may save this file as shown below. The default write directory is `tex/` relative to root. This directory is also customisable with `Document.texfolder`.
 
