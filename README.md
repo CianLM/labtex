@@ -105,7 +105,9 @@ This inserts the following into the `doc` instance.
     \end{table}
 ```
 which results in
-![Example Table](/figures/readmetable.png)
+<p align="center">
+        <img src="https://github.com/CianLM/labtex/raw/master/figures/readmetable.png">
+</p>
 
 Alternatively if an `upright` table is preffered, this may be specified through the `style` argument.
 ```python
@@ -138,8 +140,9 @@ Once again this inserts the following into the `doc` instance.
     \end{table}
 ```
 which results in
-![Example Upright Table](/figures/readmetable2.png)
-
+<p align="center">
+        <img src="https://github.com/CianLM/labtex/raw/master/figures/readmetable2.png">
+</p>
 For a graph, a similar process occurs.
 ```python
 doc.graph(
@@ -154,8 +157,9 @@ doc.graph(
 
 This generates the graph below and saves it to `figures/graph1.png`. If you want your graphs elsewhere than `figures/`, you may change `Document.graphfolder` at your convenience.
 
-![Example Graph](/figures/graph1.png)
-
+<p align="center">
+        <img src="https://github.com/CianLM/labtex/raw/master/figures/graph1.png">
+</p>
 Once you have added all your tables and graphs to the `doc` object, you may save this file as shown below. The default write directory is `tex/` relative to root. This directory is also customisable with `Document.texfolder`.
 
 ```python
