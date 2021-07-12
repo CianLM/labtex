@@ -163,18 +163,16 @@ class Document:
 
         eq = LinearRegression(*data)
         filename = f"graph{self.graphnumber}"
-        eq.savefig(Document.graphfolder + filename,title,xnameandsymbol,ynameandsymbol)
-        print(f"labtex: Wrote to '{Document.graphfolder + filename}.png'.")
 
-        if(Document.graphfolder != '.'): # assuming the folder is a subfolder
-            graph = graph.replace("!filename","../" + Document.graphfolder +  filename)
-        else:
-            graph = graph.replace("!filename", Document.graphfolder + filename)
+        graph = graph.replace("!filename", Document.graphfolder + filename)
 
         self.document = self.document.replace("!graph",graph)
 
         if (not os.path.exists(Document.graphfolder)):
             os.makedirs(Document.graphfolder)
+            
+        eq.savefig(Document.graphfolder + filename,title,xnameandsymbol,ynameandsymbol)
+        print(f"labtex: Wrote to '{Document.graphfolder + filename}.png'.")
 
     def save(self,filename: str ="labdocument"):
         "Save the document to 'filename.tex'."
@@ -182,7 +180,7 @@ class Document:
         self.document = self.document.replace("!table","").replace("!graph","")
 
         if(not os.path.exists(Document.texfolder)):
-            os.makdirs(Document.texfolder)
+            os.makedirs(Document.texfolder)
 
         with open(Document.texfolder + filename + '.tex','w') as outputfile:
             outputfile.write(self.document)

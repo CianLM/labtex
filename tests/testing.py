@@ -168,7 +168,7 @@ class TestMeasurementandListInteractions(unittest.TestCase):
         ) 
 
 # Two MeasurementLists to be used in the rest of the tests
-voltages = MeasurementList([1.33333,3,5,7,8.5,10],1,"V")
+voltages = MeasurementList([1.3,3,5,7,8.5,10],1,"V")
 temperatures = MeasurementList([23,55,67,82,88,96],5,"C")
 
 
@@ -176,40 +176,40 @@ temperatures = MeasurementList([23,55,67,82,88,96],5,"C")
 
 # Linear Regression
 
-# eq = LinearRegression(voltages,temperatures)
-# print(eq)
+eq = LinearRegression(voltages,temperatures)
+print(eq)
 
 
 
 # Latex template creation
-# doc = Document(title = "Lab Report Template",author = "CianLM")
+doc = Document(title = "Lab Report Template",author = "CianLM")
 
 # print(MeasurementList.sin(voltages))
 
 
-# doc.table(
-#     listheads = ["Voltage, V","Temperature, T"],
-#     data = [voltages,temperatures],
-#     # headers = ["Variables","Data"],
-#     caption = "Voltage Temperature Correlation"
-# )
+doc.table(
+    listheads = ["Voltage, V","Temperature, T"],
+    data = [voltages,temperatures],
+    # headers = ["Variables","Data"],
+    caption = "Voltage Temperature Correlation"
+)
 
-# doc.table(
-#     listheads = ["Voltage, V","Temperature, T"],
-#     data = [voltages,temperatures],
-#     caption = "Voltage Temperature Correlation",
-#     style = "upright"
-# )
+doc.table(
+    listheads = ["Voltage, V","Temperature, T"],
+    data = [voltages,temperatures],
+    caption = "Voltage Temperature Correlation",
+    style = "upright"
+)
 
-# doc.graph(
-#     data = [voltages,temperatures],
-#     title = "Voltage Temperature Correlation",
-#     xnameandsymbol = "Voltage, V",
-#     ynameandsymbol = "Temperature, T",
-#     caption = "Linear Regression of Voltage and Temperature"
-# )
+doc.graph(
+    data = [voltages,temperatures],
+    title = "Voltage Temperature Correlation",
+    xnameandsymbol = "Voltage, V",
+    ynameandsymbol = "Temperature, T",
+    caption = "Linear Regression of Voltage and Temperature"
+)
 
-# doc.save("test")
+doc.save("test")
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
