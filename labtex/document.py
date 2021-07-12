@@ -164,7 +164,10 @@ class Document:
         eq = LinearRegression(*data)
         filename = f"graph{self.graphnumber}"
 
-        graph = graph.replace("!filename", Document.graphfolder + filename)
+        if(Document.graphfolder != '.'): # assuming the graph folder is a subfolder
+            graph = graph.replace("!filename","../" + Document.graphfolder +  filename)
+        else:
+            graph = graph.replace("!filename", Document.graphfolder + filename)
 
         self.document = self.document.replace("!graph",graph)
 
