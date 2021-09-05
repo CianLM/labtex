@@ -172,4 +172,4 @@ doc.save("test")
 
 ## Contributions
 
-Feel free to submit a pull request.
+Feel free to submit a pull request or reach out with feature suggestions.

@@ -3,12 +3,7 @@ from typing import Union
 import math
 
 # TODO
-# Prefix conversion
-# MeasurementList error prop errors
-# MeasurementList type errors in regression
-# MeasurementList type compat 
-# ease of linreg with external
-# better looking plots
+# MeasurementList type compatability
 
 class Unit:
     "SI Unit taking in a string."
