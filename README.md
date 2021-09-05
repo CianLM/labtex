@@ -2,13 +2,14 @@
 
 ## Purpose
 
-I wrote this package with the intention of providing a single solution to the repetitive tasks in a lab environment. Whether you are doing error propagation, linear regression or LaTeX tables by hand, this package aims to expedite the process.
+This package intends to providing a single solution to the repetitive tasks in a lab environment. If you are doing error propagation, linear regression or LaTeX tables/figures by hand, this package automates the process.
 
 ## Features
 
 - Measurement and MeasurementList classes with automatic:
   - Error propagation
-  - Unit parsing and propagation
+  - Printing to correct significant figures
+  - Unit parsing, propagation and conversion
 - Linear regression
 - Automatic table generation in three styles
 - Automatic plot generation with matplotlib
@@ -35,7 +36,7 @@ x = Measurement(1.1,0.3,"m")
 y = Measurement(2.22,0.4,"m")
 z = Measurement(314,10,"V")
 ```
-Note that this unit parsing supports all common units, prefixes and powers of units.
+Note that this unit parsing supports all combinations of common units, prefixes and powers of units, eg. any of "nm^2", "C^-1", "kg m^2 s^-2", "J^3" etc. are supported.
 
 Measurement instances support all operations (`+-*/` and `**`) as well as math functions with the error and units automatically propagated. Some examples are shown below.
 ```python
@@ -54,6 +55,7 @@ print(x ** 2)
 print(Measurement.tan(x))
 # 2 ± 1 
 ```
+Notice also that Measurements are rounded to the significant figures as dictated by the uncertainty.
 
 For a list of measurements, the `MeasurementList` class functions identically to the `Measurement` class, only now taking a list of values.
 
@@ -77,7 +79,7 @@ lobf = LinearRegression(voltages,temperatures)
 print(lobf)
 # 8 ± 1 C V^-1 + 23 ± 6 C
 ```
-Observe that printing all `Measurement` and `MeasurementList` instances rounds the value to the largest sigfig of the error, as is convention.
+Observe that printing all `Measurement` and `MeasurementList` instances rounds the value to the largest significant figure of the error, as is convention.
 
 
 For LaTeX template file output, the `Document` class is used. Argument names are not required, they are shown here only for demonstration.
@@ -111,7 +113,7 @@ which results in
 ![](https://github.com/CianLM/labtex/raw/master/figures/readmetable.png)
 
 
-Alternatively if an `upright` table is preffered, this may be specified through the `style` argument.
+Alternatively if an `upright` table is preferred, this may be specified through the `style` argument.
 ```python
 doc.table(
     listheads = ["Voltage, V","Temperature, T"],

@@ -1,5 +1,5 @@
-from .linear import LinearRegression
-from .measurement import MeasurementList
+from labtex.linear import LinearRegression
+from labtex.measurement import MeasurementList
 
 from typing import List, Union
 
@@ -29,9 +29,8 @@ class Document:
 }
 
 \section{Introduction}
-\subsection{Aim}
 
-\subsection{Theory}
+\section{Theory}
 
 \section{Method}
 
@@ -45,7 +44,7 @@ class Document:
 
 \section{Discussion}
 
-\section{Bibliography}
+\section*{References}
 
 \end{document}
 """
@@ -174,7 +173,7 @@ class Document:
         if (not os.path.exists(Document.graphfolder)):
             os.makedirs(Document.graphfolder)
             
-        eq.savefig(Document.graphfolder + filename,title,xnameandsymbol,ynameandsymbol)
+        eq.savefig(Document.graphfolder + filename,title,xnameandsymbol,ynameandsymbol,showline,self.graphnumber)
         print(f"labtex: Wrote to '{Document.graphfolder + filename}.png'.")
 
     def save(self,filename: str ="labdocument"):

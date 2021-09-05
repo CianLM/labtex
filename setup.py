@@ -5,7 +5,7 @@ import pathlib
 DIR = pathlib.Path(__file__).parent
 README = (DIR / 'README.md').read_text()
 
-VERSION = '0.2.3'
+VERSION = '0.3.0'
 DESCRIPTION = 'Lab report data analysis and LaTeX file generation'
 
 setuptools.setup(

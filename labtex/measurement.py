@@ -1,7 +1,7 @@
 import math
 from typing import List, Union
 
-from .unit import Unit
+from labtex.unit import Unit
 
 class Measurement:
     def __init__(self, value: float, uncertainty: float = 0, unit: Union[Unit,str] = ""):
@@ -15,17 +15,30 @@ class Measurement:
     def __repr__(self):
         "Print string with sigfigs up to uncertainty."
         sigdigits = -math.floor(math.log10(self.uncertainty))
-        # To account for rounding up of uncertainty before applying it
+        # To account for rounding up of uncertainty before applying it,
+        # eg. 98 => sigdigits = -1 but round(98,-1) => 100 so we apply again to get -2.
         sigdigits = -math.floor(math.log10(round(self.uncertainty,sigdigits)))
-
-        if(sigdigits > 0):
-            return f"{round(self.value,sigdigits)} ± {round(self.uncertainty,sigdigits)} {self.unit}"
-        else: # remove decimal points from the float data type
+        
+        if(sigdigits >= 3):
+            return f"({round(round(self.value * 10**sigdigits),sigdigits)} ± {round(math.ceil(self.uncertainty * 10**sigdigits),sigdigits)}) × 10^{{{-sigdigits}}} {self.unit}"
+        elif(sigdigits > 0):
+            return f"{round(self.value,sigdigits) } ± {round(self.uncertainty,sigdigits)} {self.unit}"
+        elif(sigdigits > -3): # remove decimal points from the float data type
             return f"{round(round(self.value),sigdigits)} ± {round(int(self.uncertainty),sigdigits)} {self.unit}"
-
-
+        else:
+            return f"({round(round(self.value,sigdigits) * 10**sigdigits)} ± {round(round(self.uncertainty,sigdigits) * 10**sigdigits)}) × 10^{{{-sigdigits}}} {self.unit}"
+    
     def __add__(self,obj):
         "Add two measurements."
+
+        # Addition necessitates independent variables
+        if(self == obj):
+            return Measurement(
+            self.value * 2,
+            self.uncertainty * 2,
+            self.unit * 2
+        )
+
         if(isinstance(obj,Measurement)):
             if(self.unit == obj.unit):
                 return Measurement(
@@ -61,6 +74,15 @@ class Measurement:
         
     def __sub__(self,obj):
         "Subtract two measurements."
+        
+        # This only occurs if you do: x - x
+        if(self == obj):
+            return Measurement(
+            0,
+            0,
+            self.unit * 2
+        )
+
         if(isinstance(obj,Measurement)):
             if(self.unit == obj.unit):
                 return Measurement(
@@ -97,7 +119,8 @@ class Measurement:
     def __mul__(self,obj):
         "Multiply two measurements."
 
-        # multiplication necessitates independent variables
+        # Multiplication necessitates independent variables
+        # This occurs if you do: x * x
         if(self == obj):
             return Measurement(
             self.value ** 2,
@@ -118,22 +141,48 @@ class Measurement:
                 )
 
         else:
-            return Measurement(
-                self.value * obj,
-                self.uncertainty * obj,
-                self.unit
-            )
+            # if no unit conversion is possible,
+            if(self.unit * obj == self.unit):
+                return Measurement(
+                    self.value * obj,
+                    self.uncertainty * obj,
+                    self.unit * obj
+                )
+            else: # otherwise unit conversion has happened, so
+                return Measurement(
+                    self.value,
+                    self.uncertainty,
+                    self.unit * obj
+                )
+
             
     def __rmul__(self,obj):
         "Reverse multiplication to accomodate constant * measurement."
-        return Measurement(
+        oldrepr = Unit.__repr__(self.unit)
+        if(Unit.__repr__(self.unit * obj) == oldrepr):
+            return Measurement(
                 self.value * obj,
                 self.uncertainty * obj,
-                self.unit
+                self.unit * obj
+            )
+        else: # unit conversion has happened, so
+            return Measurement(
+                self.value,
+                self.uncertainty,
+                self.unit * obj
             )
     
     def __truediv__(self,obj):
         "Divide two measurements."
+
+        # While nonsensical, this only occurs if you do: x / x
+        if(self == obj):
+            return Measurement(
+            1,
+            0,
+            ""
+        )
+
         if(isinstance(obj,Measurement)):
             return Measurement(
                 self.value / obj.value,
@@ -147,11 +196,19 @@ class Measurement:
             )
 
         else:
-            return Measurement(
-                self.value / obj,
-                (self.value / obj) * self.relativeuncertainty,
-                self.unit / obj
-            )
+            oldrepr = Unit.__repr__(self.unit)
+            if(Unit.__repr__(self.unit / obj) == oldrepr):
+                return Measurement(
+                    self.value / obj,
+                    self.uncertainty / obj,
+                    self.unit / obj
+                )
+            else: # unit conversion has happened, so
+                return Measurement(
+                    self.value,
+                    self.uncertainty,
+                    self.unit / obj
+                )
 
     def __rtruediv__(self,obj):
         "Reverse division to accomodate constant / measurement."
@@ -177,70 +234,91 @@ class Measurement:
             ""
         )
 
-    # Static Functions applied to Measurments
+    # Static Functions applied to Measurements
     # All parameters are instances of Measurement
     @staticmethod
     def sin(x):
-        "Sine function."
-        return Measurement(
+        "Sine function on a Measurement."
+        if(Unit.unitless(x.unit)):
+            return Measurement(
             math.sin(x.value),
             math.fabs(math.cos(x.value)) * x.uncertainty,
             ""
-        )
+            )
+        else:
+            raise Exception(f"Trigonometric functions take in dimensionless quantities. Input has units: {x.units}")
 
     @staticmethod
     def cos(x):
         "Cosine function on a Measurement."
-        return Measurement(
-            math.cos(x.value),
-            math.fabs(math.sin(x.value)) * x.uncertainty,
-            ""
-        )
+        if(Unit.unitless(x.unit)):
+            return Measurement(
+                math.cos(x.value),
+                math.fabs(math.sin(x.value)) * x.uncertainty,
+                ""
+            )
+        else:
+            raise Exception(f"Trigonometric functions take in dimensionless quantities. Input has units: {x.units}")
 
     @staticmethod
     def tan(x):
         "Tangent function on a Measurement."
-        return Measurement(
-            math.tan(x.value),
-            math.fabs( 1 / math.cos(x.value)**2 ) * x.uncertainty,
-            ""
-        )
+        if(Unit.unitless(x.unit)):
+            return Measurement(
+                math.tan(x.value),
+                math.fabs( 1 / math.cos(x.value)**2 ) * x.uncertainty,
+                ""
+            )
+        else:
+            raise Exception(f"Trigonometric functions take in dimensionless quantities. Input has units: {x.units}")
     
     @staticmethod
     def log(x):
         "Natural log function on a Measurment."
-        return Measurement(
-            math.log(x.value),
-            x.relativeuncertainty,
-            ""
-        )
+        if(Unit.unitless(x.unit)):
+            return Measurement(
+                math.log(x.value),
+                x.relativeuncertainty,
+                ""
+            )
+        else:
+            raise Exception(f"Log functions take in dimensionless quantities. Input has units: {x.units}")
     
     @staticmethod
     def asin(x):
         "Inverse sine function on a Measurement."
-        return Measurement(
-            math.asin(x.value),
-            x.uncertainty / (math.sqrt(1 - x.value**2)),
-            ""
-        )
+        if(Unit.unitless(x.unit)):
+            return Measurement(
+                math.asin(x.value),
+                x.uncertainty / (math.sqrt(1 - x.value**2)),
+                ""
+            )
+        else:
+            raise Exception(f"Trigonometric functions take in dimensionless quantities. Input has units: {x.units}")
     
     @staticmethod
     def acos(x):
         "Inverse cosine function on a Measurement."
-        return Measurement(
-            math.acos(x.value),
-            x.uncertainty / (math.sqrt(1 - x.value**2)),
-            ""
-        )
+        if(Unit.unitless(x.unit)):
+             return Measurement(
+                math.acos(x.value),
+                x.uncertainty / (math.sqrt(1 - x.value**2)),
+                ""
+            )
+        else:
+            raise Exception(f"Trigonometric functions take in dimensionless quantities. Input has units: {x.units}")
 
     @staticmethod
     def atan(x):
         "Inverse tangent function on a Measurement."
-        return Measurement(
-            math.atan(x.value),
-            x.uncertainty / (math.sqrt(1 - x.value**2)),
-            ""
-        )
+        if(Unit.unitless(x.unit)):
+            return Measurement(
+                math.atan(x.value),
+                x.uncertainty / (math.sqrt(1 - x.value**2)),
+                ""
+            )
+        else:
+            raise Exception(f"Trigonometric functions take in dimensionless quantities. Input has units: {x.units}")
 
 
 
@@ -248,7 +326,7 @@ class MeasurementList:
     "An extension of the measurement class to take list values."
     def __init__(self,values: Union[List[float],List[Measurement]], uncertainty: float = math.nan, unit: Union[Unit,str] = ""):
         
-        if (all( isinstance(value,Measurement) for value in values )):
+        if (all( isinstance(value,Measurement) and value.unit == values[0].unit for value in values )):
             self.uncertainty = max(value.uncertainty for value in values)
             self.unit = values[0].unit
 
@@ -272,10 +350,15 @@ class MeasurementList:
         # To account for rounding up of uncertainty before applying it
         sigdigits = -math.floor(math.log10(round(self.uncertainty,sigdigits)))
 
-        if(sigdigits > 0):
+        if(sigdigits >= 3):
+            return f"({[round(round(m.value * 10**sigdigits),sigdigits) for m in self.values]} ± {round(math.ceil(self.uncertainty * 10**sigdigits),sigdigits)}) × 10^{{{-sigdigits}}} {self.unit}"
+        elif(sigdigits > 0):
             return f"{[ round(m.value,sigdigits) for m in self.values]} ± {round(self.uncertainty,sigdigits)} {self.unit}"
-        else: # remove decimal points from the float data type
+        elif(sigdigits > -3): # remove decimal points from the float data type
             return f"{[ round(round(m.value),sigdigits) for m in self.values ]} ± {round(int(self.uncertainty),sigdigits)} {self.unit}"
+        else:
+            return f"({[round(round(m.value,sigdigits) * 10**sigdigits) for m in self.values]} ± {round(round(self.uncertainty,sigdigits) * 10**sigdigits)}) × 10^{{{-sigdigits}}} {self.unit}"
+
 
     def tableprint(self,flags : str = "uv"): # u -> uncertainty, v -> values
         "return string in printable LaTeX table format. Used in 'Document().table()'."
@@ -301,10 +384,22 @@ class MeasurementList:
 
     def __getitem__(self,item):
         return self.values[item]
+
+    def __iter__(self):
+        yield from self.values
     
     def tolist(self):
         return [measurement.value for measurement in self.values]
 
+    def append(self,obj):
+        if(isinstance(obj,MeasurementList)):
+            return MeasurementList(*[value for value in self.values],*[value for value in obj])
+        elif(isinstance(obj,Measurement)):
+            return MeasurementList(*[value for value in self.values],obj)
+        else:
+            raise Exception(f"Object of type {type(obj)} cannot be appended to a MeasurementList. Try a MeasurementList or a Measurement.")
+
+            
     def __add__(self,obj):
         if(isinstance(obj,MeasurementList)):
             if(self.unit == obj.unit):
