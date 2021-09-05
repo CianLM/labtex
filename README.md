@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This package intends to providing a single solution to the repetitive tasks in a lab environment. If you are doing error propagation, linear regression or LaTeX tables/figures by hand, this package automates the process.
+This package intends to provide a single solution to the repetitive tasks in a lab environment. If you are doing error propagation, linear regression or LaTeX tables/figures by hand, this package automates the process.
 
 ## Features
 
