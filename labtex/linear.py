@@ -40,12 +40,16 @@ class LinearRegression:
     def __repr__(self):
         return f"m = {self.lobf['m']}\nc = {self.lobf['c']}"
 
-    def savefig(self,filename : str = "figure", title: str = "", xlabel : str = "", ylabel: str = "",showline : bool = True, graphnumber : int = 0):
+    def plot(self, title: str = "", xlabel : str = "", ylabel: str = "",showline : bool = True, graphnumber : int = 0):
         plt.figure(graphnumber)
         plt.errorbar(self.x.tolist(),self.y.tolist(),yerr = self.y.uncertainty,fmt='o')
         if showline:
-            plt.plot(self.x.tolist(),(self.x*self.lobf["m"].value+self.lobf["c"].value).tolist())
+            plt.plot(self.x.tolist(), (self.x * self.lobf["m"].value + self.lobf["c"].value).tolist() )
         plt.title(title)
-        plt.xlabel(xlabel + f", (${self.x.unit}$)")
-        plt.ylabel(ylabel + f", (${self.y.unit}$)")
+        plt.xlabel(xlabel + f"{', ($' + str(self.x.unit) + '$)' if self.x.unit != '' else ''}")
+        plt.xlabel(ylabel + f"{', ($' + str(self.y.unit) + '$)' if self.y.unit != '' else ''}")
+        return plt
+
+    def savefig(self,filename : str = "figure"):
+
         plt.savefig(filename)

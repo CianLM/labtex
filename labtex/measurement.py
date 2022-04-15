@@ -1,6 +1,5 @@
 import math
 from typing import List, Union
-
 from labtex.unit import Unit
 
 class Measurement:

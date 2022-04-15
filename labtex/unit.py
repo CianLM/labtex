@@ -7,16 +7,50 @@ import math
 
 class Unit:
     "SI Unit taking in a string."
+    # Not Supported: mol (moles), cd (candela)
+    baseUnits = ['m','g','s','A','C','K']
+
+    derivedUnits = {
+    'J':'kg m^2 s^-2',
+    'V':'kg m^2 s^-3 A^-1',
+    'N':'kg m s^-2',
+    'W':'kg m^2 s^-3',
+    'T':'kg s^-2 A^-1',
+    'Pa':'kg m^-1 s^-2',
+    'Hz': 's^-1'
+    }
+
+    # TODO: add eV (electron volts) and K (kelvin)
+
+    knownUnits = list(derivedUnits.keys())
+    knownUnits += baseUnits
+
+    prefixes = {
+    'a':1e-18,
+    'f':1e-15,
+    'p':1e-12,
+    'n':1e-9,
+    'u':1e-6,
+    'm':1e-3,
+    'c':1e-2,
+    '':1,
+    'k':1e3,
+    'M':1e6,
+    'G':1e9,
+    'T':1e12,
+    'P':1e15,
+    'E':1e18
+    }
+
 
     def __init__(self,unitString: Union[str,dict]):
-        Unit.knownUnits = ['g','s','A','K','C','J','V','N','W','T','Pa','Hz','m']
-        Unit.prefixes = {'n':1e-9,'u':1e-6,'m':1e-3,'c':1e-2,'':1,'k':1e3,'M':1e6,'G':1e9}
+
         
         # Given user string input, parse the units, prefixes and powers
         if(type(unitString) == str):
             self.units = dict.fromkeys(Unit.knownUnits)
             for unit in self.units:
-                self.units[unit] = {'prefix':'','power':0}
+                self.units[unit] = {'prefix':'', 'power':0}
             self.parse( unitString.replace(' ','').replace('{','').replace('}','') )
         
         # Used internally to construct a Unit from a dictionary of its units
@@ -38,14 +72,20 @@ class Unit:
         "Decompose string into its constituent SI units."
 
         # Match a prefix
-        prefix = re.compile('([numckMG])')
+        prefix = re.compile(f'([{"".join(prefix for prefix in Unit.prefixes.keys())}])')
         # Match a known unit
-        unit = re.compile('([gsAKCJVNWTm]|(?:Pa)|(?:Hz))')
+        # Compiles to '([gsAKCJVNWTm]|(?:Pa)|(?:Hz))' for default units
+        unit = re.compile(f"([{''.join([ unit_str if len(unit_str) == 1 else '' for unit_str in Unit.knownUnits])}]|{'|'.join([ ('(?:' + unit_str + ')') for unit_str in filter(lambda x: len(x) > 1, Unit.knownUnits) ])})") 
         # Match a '^' followed optionally by '-' and then any number of digits
         rgxpower = re.compile('(\^)(\-?)(\d+)')
+        flip = False
 
         i = 0
         while i < len(unitString):
+            if (unitString[i] == "/"):
+                flip = True
+                i += 1
+
             prefixmatch = prefix.match(unitString[i:])
             prefixfound = prefixmatch is not None
             unitmatch = unit.match(unitString[i+prefixfound:])
@@ -55,7 +95,7 @@ class Unit:
                 powerlength = powermatch.span()[1] if powermatch != None else 0
                 self.units[unitname] = {
                     'prefix': prefixmatch.group(1) if prefixfound else '',
-                    'power': int(powermatch.group(2) + powermatch.group(3) if powermatch != None else 1)
+                    'power': (-1)**(2-flip) * int(powermatch.group(2) + powermatch.group(3) if powermatch != None else 1)
                     }
                 i += prefixfound + len(unitname) + powerlength
 
@@ -68,14 +108,14 @@ class Unit:
                     powerlength = powermatch.span()[1] if powermatch != None else 0
                     self.units[unitname] = {
                         'prefix': '',
-                        'power': int(powermatch.group(2) + powermatch.group(3) if powermatch else 1)
+                        'power': (-1)**(2-flip) * int(powermatch.group(2) + powermatch.group(3) if powermatch else 1)
                         }
                     i += len(unitname) + powerlength
                 
                 else:
-                    raise Exception(f"Error in unit parsing with unknown characters: {unitString[i:]}")
+                    raise Exception(f"labtex-PE2: Error in unit parsing with unknown character: {unitString[i]} P:{prefixmatch} U:{unitmatch}")
             else:
-                raise Exception(f"Error in unit parsing with unknown characters: {unitString[i:]}")
+                raise Exception(f"labtex-PE1: Error in unit parsing with unknown character: {unitString[i]} P:{prefixmatch} U:{unitmatch}")
         
     @staticmethod
     def unitless(self):

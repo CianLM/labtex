@@ -87,7 +87,7 @@ class Document:
     def __repr__(self):
         return self.document
 
-    def table(self,listheads : List[str], data : Union[List[MeasurementList]], \
+    def table(self,listheads : List[str], data : List[MeasurementList], \
         headers :List[str] = [], caption : str = "",style : str = "sideways"):
         """
         Add a table to the LaTeX document. 
@@ -146,7 +146,7 @@ class Document:
         self.document = self.document.replace("!table",table)
 
     def graph(self, data : List[MeasurementList], title : str = "", xnameandsymbol : str = "Name, Symbol", \
-        ynameandsymbol : str = "Name, Symbol", caption : str = "", width : float = 0.8, style :str = "default", \
+        ynameandsymbol : str = "Name, Symbol", caption : str = "", width : float = 0.8, style : str = "default", \
         showline : bool = True):
         "Add a graph to the LaTeX document."
         graph = Document.graphtemplates[style]
@@ -172,8 +172,8 @@ class Document:
 
         if (not os.path.exists(Document.graphfolder)):
             os.makedirs(Document.graphfolder)
-            
-        eq.savefig(Document.graphfolder + filename,title,xnameandsymbol,ynameandsymbol,showline,self.graphnumber)
+        eq.plot(title,xnameandsymbol,ynameandsymbol,showline,self.graphnumber)
+        eq.savefig(Document.graphfolder + filename)
         print(f"labtex: Wrote to '{Document.graphfolder + filename}.png'.")
 
     def save(self,filename: str ="labdocument"):
@@ -183,6 +183,8 @@ class Document:
 
         if(not os.path.exists(Document.texfolder)):
             os.makedirs(Document.texfolder)
+        if(os.path.exists(Document.texfolder + filename + ".tex")):
+            print(f"labtex: '{Document.texfolder + filename}.tex' already exists. Overwriting.")
 
         with open(Document.texfolder + filename + '.tex','w') as outputfile:
             outputfile.write(self.document)

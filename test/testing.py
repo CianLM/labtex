@@ -21,12 +21,12 @@ class TestUnitClass(unittest.TestCase):
         self.assertEqual(repr(Unit("mm^2")), "mm^2")
 
     def test_generalparsing(self):
-        self.assertEqual(repr(Unit("kgm^2 AJ^-10")), "kg A J^{-10} m^2")
+        self.assertEqual(repr(Unit("kgm^2 AJ^-10")), "J^{-10} m^2 kg A")
 
     def test_maxparsing(self):
         self.assertEqual( 
             repr(Unit("ng^-5us^-4mA^-3cK^-2C^-1kJ^1MV^2N^3GW^4T^5Pa^6Hzm^101")),
-            "ng^{-5} us^{-4} mA^{-3} cK^{-2} C^{-1} kJ MV^2 N^3 GW^4 T^5 Pa^6 Hz m^101"
+            "kJ MV^2 N^3 GW^4 T^5 Pa^6 Hz m^101 ng^{-5} us^{-4} mA^{-3} C^{-1} cK^{-2}"
     )
     
     def test_exceptions(self):
@@ -48,16 +48,23 @@ class TestUnitClass(unittest.TestCase):
         self.assertTrue(Unit.singular(Unit("m^2")))
         self.assertTrue(not Unit.singular(Unit("Vm")))
 
-    def unit_conversion(self):
+    def test_unit_conversion(self):
         self.assertTrue(
             Unit("m") * 1e-9 == 1e-9 * Unit("m") == Unit("m") / 1e9 == 1e-9 / Unit("m^-1") == Unit("nm")
         )
         self.assertTrue(
-            Unit("mm^2") * 1e-4 == Unit("m^2")
+            Unit("mm^2") * 1e6 == Unit("m^2")
         )
         self.assertTrue(
-            Unit("mm^-2") * 1e-4 == Unit("m^-2")
+            Unit("mm^-2") * 1e-6 == Unit("m^-2")
         )
+
+    def test_slash_parsing(self):
+        self.assertEqual(repr(Unit("m /s")), "m s^{-1}")
+        self.assertEqual(repr(Unit("V/m")), "V m^{-1}")
+        self.assertEqual(repr(Unit("kg / s^2m")), "m^{-1} kg s^{-2}")
+        self.assertEqual(repr(Unit("ngs^2 / C^3 mm^-1")), "mm ng s^2 C^{-3}")
+    
 
 
 # Measurement Class 
@@ -230,7 +237,7 @@ eq = LinearRegression(voltages,temperatures)
 class TestLinearRegression(unittest.TestCase):
     def test_repr(self):
         self.assertTrue(
-            LinearRegression.__repr__(eq) == "m = 8 ± 1 C V^{-1}\nc = 23 ± 6 C"
+            LinearRegression.__repr__(eq) == "m = 8 ± 1 V^{-1} C\nc = 23 ± 6 C"
         )
 
 
