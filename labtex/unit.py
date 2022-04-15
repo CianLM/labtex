@@ -8,26 +8,27 @@ import math
 class Unit:
     "SI Unit taking in a string."
     # Not Supported: mol (moles), cd (candela)
-    baseUnits = ['m','g','s','A','C','K']
+    baseUnits = ['m','g','s','A','K']
 
     derivedUnits = {
-    'J':'kg m^2 s^-2',
-    'V':'kg m^2 s^-3 A^-1',
-    'N':'kg m s^-2',
-    'W':'kg m^2 s^-3',
-    'T':'kg s^-2 A^-1',
-    'Pa':'kg m^-1 s^-2',
-    'Hz': 's^-1'
-    }
+    'J': ['kg m^2 s^-2', lambda x: x],
+    'V': ['kg m^2 s^-3 A^-1', lambda x: x],
+    'N': ['kg m s^-2', lambda x: x],
+    'W': ['kg m^2 s^-3', lambda x: x],
+    'T': ['kg s^-2 A^-1', lambda x: x],
+    'Pa': ['kg m^-1 s^-2', lambda x: x],
+    'Hz': ['s^-1', lambda x: x],
+    'C' : ['K', lambda x: x + 273.15],
+    'eV' : ['J', lambda x: x * 1.602176634e-19],
 
-    # TODO: add eV (electron volts) and K (kelvin)
+    }
 
     knownUnits = list(derivedUnits.keys())
     knownUnits += baseUnits
 
     prefixes = {
-    'a':1e-18,
-    'f':1e-15,
+    # 'a':1e-18,
+    # 'f':1e-15,
     'p':1e-12,
     'n':1e-9,
     'u':1e-6,
@@ -38,8 +39,8 @@ class Unit:
     'M':1e6,
     'G':1e9,
     'T':1e12,
-    'P':1e15,
-    'E':1e18
+    # 'P':1e15, # breaks parsing for Pa (Pascals)
+    # 'E':1e18
     }
 
 
@@ -51,7 +52,7 @@ class Unit:
             self.units = dict.fromkeys(Unit.knownUnits)
             for unit in self.units:
                 self.units[unit] = {'prefix':'', 'power':0}
-            self.parse( unitString.replace(' ','').replace('{','').replace('}','') )
+            self.parse(unitString.replace('{','(').replace('}',')'))
         
         # Used internally to construct a Unit from a dictionary of its units
         else:
@@ -71,59 +72,55 @@ class Unit:
     def parse(self,unitString):
         "Decompose string into its constituent SI units."
 
-        # Match a prefix
-        prefix = re.compile(f'([{"".join(prefix for prefix in Unit.prefixes.keys())}])')
+        # Match a prefix that is followed by a non-whitespace character
+        prefix = re.compile(f'([{"".join(prefix for prefix in Unit.prefixes.keys())}])\\B')
         # Match a known unit
-        # Compiles to '([gsAKCJVNWTm]|(?:Pa)|(?:Hz))' for default units
+        # Compiles to '([JVNWTmgsACK]|(?:Pa)|(?:Hz))' for default (base + derived) units
         unit = re.compile(f"([{''.join([ unit_str if len(unit_str) == 1 else '' for unit_str in Unit.knownUnits])}]|{'|'.join([ ('(?:' + unit_str + ')') for unit_str in filter(lambda x: len(x) > 1, Unit.knownUnits) ])})") 
         # Match a '^' followed optionally by '-' and then any number of digits
-        rgxpower = re.compile('(\^)(\-?)(\d+)')
+        power = re.compile('(\^)(\-?)(\d+)')
+        # power = re.compile(r'\^(?:-?\d+)')
         flip = False
 
         i = 0
         while i < len(unitString):
-            if (unitString[i] == "/"):
+            if (unitString[i] == '/'):
+                if (flip):
+                    raise Exception("labtex Unit Parsing Error: Cannot have two '/' characters.")
                 flip = True
                 i += 1
 
             prefixmatch = prefix.match(unitString[i:])
             prefixfound = prefixmatch is not None
+            # As all prefixes are of length 1
             unitmatch = unit.match(unitString[i+prefixfound:])
-            if (unitmatch is not None):
-                unitname = unitmatch.group(1)
-                powermatch = rgxpower.match(unitString[i+prefixfound+len(unitname):])
-                powerlength = powermatch.span()[1] if powermatch != None else 0
-                self.units[unitname] = {
-                    'prefix': prefixmatch.group(1) if prefixfound else '',
-                    'power': (-1)**(2-flip) * int(powermatch.group(2) + powermatch.group(3) if powermatch != None else 1)
-                    }
-                i += prefixfound + len(unitname) + powerlength
+            # print(f"unitmatch: {unitmatch}")
+            if (unitmatch is None):
+                if (unitString[i] in ['(',')']):
+                    raise Exception('labtex Unit Parsing Error: Parentheses are not supported. Use negative exponents or a \'/\' instead.')
+                if (unitString[i] != ' '):
+                    raise Exception(f'labtex Unit Parsing Error: Unknown character: \'{unitString[i]}\'. If this is intended, you can add it to the base units/prefixes with `Unit.baseUnits` and `Unit.prefixes`.')
+                i += 1
+                continue
 
-            # account for 'm' as a prefix match but no succeeding unit
-            elif (prefixfound):
-                unitmatch = unit.match(unitString[i:])
-                if(unitmatch is not None):
-                    unitname = unitmatch.group(1)
-                    powermatch = rgxpower.match(unitString[i+len(unitname):])
-                    powerlength = powermatch.span()[1] if powermatch != None else 0
-                    self.units[unitname] = {
-                        'prefix': '',
-                        'power': (-1)**(2-flip) * int(powermatch.group(2) + powermatch.group(3) if powermatch else 1)
-                        }
-                    i += len(unitname) + powerlength
-                
-                else:
-                    raise Exception(f"labtex-PE2: Error in unit parsing with unknown character: {unitString[i]} P:{prefixmatch} U:{unitmatch}")
-            else:
-                raise Exception(f"labtex-PE1: Error in unit parsing with unknown character: {unitString[i]} P:{prefixmatch} U:{unitmatch}")
-        
+            prefixstr = prefixmatch.group(1) if prefixfound else ''
+            unitstr = unitmatch.group(1)
+            powermatch = power.match(unitString[i+prefixfound+len(unitstr):])
+
+            self.units[unitstr] = {
+                "prefix": prefixstr,
+                "power": (-1)**(2-flip) * int(powermatch.group(2) + powermatch.group(3) if powermatch else 1)
+            }
+
+            i += len(prefixstr) + len(unitstr) + (powermatch.span()[1] if powermatch else 0)
+
     @staticmethod
     def unitless(self):
         return all([ dim['power'] == 0 for dim in self.units.values() ])
 
     @staticmethod
-    def singular(self): # only a single dimension has a non zero power
-        return sum([*map(lambda x: x['power'] != 0,self.units.values())]) == 1
+    def singular(self): # a unit with a single dimension
+        return sum([*map(lambda x: x['power'] != 0, self.units.values())]) == 1
 
     @staticmethod
     def singularunit(self):
