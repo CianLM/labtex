@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This package intends to provide a single solution to the repetitive tasks in a lab environment. If you are doing error propagation, linear regression or LaTeX tables/figures by hand, this package automates the process.
+This package provides a single solution to repetitive analysis tasks in a lab environment. If you are doing error propagation, linear regression or LaTeX tables/figures manually, this package automates the process.
 
 ## Features
 
@@ -52,15 +52,15 @@ print(x * z)
 print(x ** 2)
 # 1.2 ± 0.7 m^2
 
-print(Measurement.tan(x))
+print(Measurement.tan(x / y))
 # 2 ± 1 
 ```
 Notice also that Measurements are rounded to the significant figures as dictated by the uncertainty.
 
-For a list of measurements, the `MeasurementList` class functions identically to the `Measurement` class, only now taking a list of values.
+For a list of measurements, the `MeasurementList` class functions identically to the `Measurement` class, only now taking a list of values. The uncertainty can be a list or a single value for all measurements.
 
 ```python
-heights = MeasurementList([185,183,182,194,184,177],0,"cm")
+heights = MeasurementList([185,183,182,194,184,177],5,"cm")
 
 print(heights)
 # [185, 183, 182, 194, 184, 177] ± 5 cm
@@ -71,7 +71,7 @@ print(200 - heights)
 
 With two `MeasurementList` instances, they can be linearly regressed with the `LinearRegression` class.
 ```python
-voltages = MeasurementList([1.3,3,5,7,8.5,10],0,"V")
+voltages = MeasurementList([1.3,3,5,7,8.5,10],5,"V")
 temperatures = MeasurementList([23,55,67,82,88,96],20,"C")
 
 lobf = LinearRegression(voltages,temperatures)

@@ -20,7 +20,7 @@ class Unit:
     'Hz': ['s^-1', lambda x: x],
     'C' : ['K', lambda x: x + 273.15],
     'eV' : ['J', lambda x: x * 1.602176634e-19],
-
+    
     }
 
     knownUnits = list(derivedUnits.keys())
@@ -143,7 +143,8 @@ class Unit:
         if(isinstance(obj,Unit)):
             newunits = {}
             for unit in Unit.knownUnits:
-                if((self.units[unit]["power"] > 0) ^ (obj.units[unit]["power"] > 0) ):
+                # If one of the units is unitless, return the other, where prefix='' and power=0 by default.
+                if((self.units[unit]["power"] != 0) ^ (obj.units[unit]["power"] != 0) ):
                     newunits[unit] = {
                         "prefix": self.units[unit]["prefix"] + obj.units[unit]["prefix"],
                         "power": self.units[unit]["power"] + obj.units[unit]["power"]
@@ -154,27 +155,10 @@ class Unit:
                         "power": self.units[unit]["power"] + obj.units[unit]["power"]
                         }
                 else:
-                    raise Exception("Measurements have different prefixes. Multiplication not supported.")
+                    raise Exception("Units have different prefixes. Multiplication not supported.")
             return Unit(newunits)
         else:
-            # We require only a single dimension present otherwise we dont know which dimension to change the prefix of.
-            if(Unit.singular(self) and int(math.log10(obj)) == math.log10(obj)):
-                singularunit = Unit.singularunit(self)
-                multiplicativefactor = obj**(1/singularunit["power"])
-                if(Unit.prefixes[singularunit["prefix"]] * multiplicativefactor in Unit.prefixes.values()):
-                    newunits = self.units.copy()
-                    for unit in Unit.knownUnits:
-                        if(self.units[unit] == singularunit):
-                            # find the key that corresponds to this value
-                            newunits[unit] = {
-                                "prefix": list(Unit.prefixes.keys())[list(Unit.prefixes.values()).index(
-                                Unit.prefixes[singularunit["prefix"]] * multiplicativefactor
-                            )],
-                                "power": self.units[unit]["power"]
-                            }
-
-                    return Unit(newunits)
-        return self
+            return self
 
     def __rmul__(self,obj):
         return self.__mul__(obj)
@@ -184,9 +168,9 @@ class Unit:
         if(isinstance(obj,Unit)):
             newunits = {}
             for unit in Unit.knownUnits:
-                if(self.units[unit]["power"] > 0 ^ obj.units[unit]["power"] > 0 ):
+                if((self.units[unit]["power"] != 0) ^ (obj.units[unit]["power"] != 0 )):
                     newunits[unit] = {
-                        "prefix": self.units[unit]["prefix"] + obj.units[unit]["power"],
+                        "prefix": self.units[unit]["prefix"] + obj.units[unit]["prefix"],
                         "power": self.units[unit]["power"] - obj.units[unit]["power"]
                     }
                 elif(self.units[unit]["prefix"] == obj.units[unit]["prefix"]):
@@ -220,3 +204,5 @@ class Unit:
         }
         return Unit(newunits)
 
+class U(Unit):
+    pass

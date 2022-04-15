@@ -54,7 +54,7 @@ class Measurement:
                     [self.value + value for value in obj.values]
                 )
             else:
-                raise Exception("Cannot add measurement and MeasurementList with different units.")
+                raise Exception("Cannot add Measurement and MeasurementList with different units.")
 
         else:
             return Measurement(
@@ -140,36 +140,17 @@ class Measurement:
                 )
 
         else:
-            # if no unit conversion is possible,
-            if(self.unit * obj == self.unit):
-                return Measurement(
-                    self.value * obj,
-                    self.uncertainty * obj,
-                    self.unit * obj
-                )
-            else: # otherwise unit conversion has happened, so
-                return Measurement(
-                    self.value,
-                    self.uncertainty,
-                    self.unit * obj
-                )
+            return Measurement(
+                self.value * obj,
+                self.uncertainty * obj,
+                self.unit
+            )
 
             
     def __rmul__(self,obj):
         "Reverse multiplication to accomodate constant * measurement."
-        oldrepr = Unit.__repr__(self.unit)
-        if(Unit.__repr__(self.unit * obj) == oldrepr):
-            return Measurement(
-                self.value * obj,
-                self.uncertainty * obj,
-                self.unit * obj
-            )
-        else: # unit conversion has happened, so
-            return Measurement(
-                self.value,
-                self.uncertainty,
-                self.unit * obj
-            )
+        return self.__mul__(obj)
+
     
     def __truediv__(self,obj):
         "Divide two measurements."
@@ -529,3 +510,7 @@ class MeasurementList:
         return MeasurementList(
             [Measurement.atan(measurement) for measurement in x.values]
         )
+class M(Measurement):
+    pass
+class ML(MeasurementList):
+    pass
