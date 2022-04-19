@@ -36,7 +36,7 @@ x = Measurement(1.1,0.3,"m")
 y = Measurement(2.22,0.4,"m")
 z = Measurement(314,10,"V")
 ```
-Note that this unit parsing supports all combinations of common units, prefixes and powers of units, eg. any of "nm^2", "C^-1", "kg m^2 s^-2", "J^3" etc. are supported.
+where `M` is shorthand for `Measurement`. Note that the unit parsing supports all combinations of common units, prefixes and powers of units, eg. any of "nm^2", "C^-1", "kg m^2 s^-2", "J^3" etc. are supported.
 
 Measurement instances support all operations (`+-*/` and `**`) as well as math functions with the error and units automatically propagated. Some examples are shown below.
 ```python
@@ -47,13 +47,13 @@ print(x + y)
 # 3.3 ± 0.5 m
 
 print(x * z)
-# 340 ± 90 V m
+# (35 ± 9) × 10^{1} V m
 
 print(x ** 2)
 # 1.2 ± 0.7 m^2
 
 print(Measurement.tan(x / y))
-# 2 ± 1 
+# 0.5 ± 0.2  
 ```
 Notice also that Measurements are rounded to the significant figures as dictated by the uncertainty.
 
@@ -63,26 +63,28 @@ For a list of measurements, the `MeasurementList` class functions identically to
 heights = MeasurementList([185,183,182,194,184,177],5,"cm")
 
 print(heights)
-# [185, 183, 182, 194, 184, 177] ± 5 cm
+# [185 ± 5, 183 ± 5, 182 ± 5, 194 ± 5, 184 ± 5, 177 ± 5] cm
 
 print(200 - heights)
-# [15, 17, 18, 6, 16, 23] ± 5 cm
+# [15 ± 5, 17 ± 5, 18 ± 5, 6 ± 5, 16 ± 5, 23 ± 5] cm
 ```
+`MeasurementList`s also support all operations (`+-*/` and `**`) with themselves and with `Measurement`s. 
 
 With two `MeasurementList` instances, they can be linearly regressed with the `LinearRegression` class.
 ```python
-voltages = MeasurementList([1.3,3,5,7,8.5,10],5,"V")
-temperatures = MeasurementList([23,55,67,82,88,96],20,"C")
+voltages = MeasurementList([1.3,3,5,7,8.5,10],1,"V")
+temperatures = MeasurementList([23,55,67,82,88,96],[5,3,7,10,5,6],"C")
 
 lobf = LinearRegression(voltages,temperatures)
 
 print(lobf)
-# 8 ± 1 C V^-1 + 23 ± 6 C
+# m = 7 ± 1 V^{-1} C
+# c = 27 ± 7 C
 ```
 Observe that printing all `Measurement` and `MeasurementList` instances rounds the value to the largest significant figure of the error, as is convention.
 
 
-For LaTeX template file output, the `Document` class is used. Argument names are not required, they are shown here only for demonstration.
+For LaTeX template file output, the `Document` class can be used. Argument names are not required, they are shown here only for demonstration.
 ```python
 doc = Document(title="Lab Report Template",author="CianLM")
 ```
@@ -90,24 +92,24 @@ Once `doc` has been instantiated, tables and graphs may be added to the document
 
 ```python
 doc.table(
-    listheads=["Voltage, V","Temperature, T"], 
-    data=[voltages,temperatures],
-    caption="Voltage and Temperature Table"
+    nameandsymbol = ["Voltage, V","Temperature, T"],
+    data = [voltages,temperatures],
+    caption = "Voltage and Temperature Correlation"
 )
 ```
 This inserts the following into the `doc` instance.
 ```latex
 \begin{table}[ht]
-        \centering
-        \caption{Voltage Temperature Correlation}
-        \label{tab:1}
-        \begin{tabular}{*{7}c}
-            \toprule
-            Voltage, V, $\pm$ 3 V & 1 & 3 & 5 & 7 & 8 & 10 \\ 
-            Temperature, T, $\pm$ 20 C & 20 & 60 & 70 & 80 & 90 & 100 \\ 
-            \bottomrule
-        \end{tabular}
-    \end{table}
+    \centering
+    \caption{Voltage and Temperature Correlation}
+    \label{tab:1}
+    \begin{tabular}{c|cccccc}
+        \toprule
+            Voltage, V, ($\pm 1$ V) & 1 & 3 & 5 & 7 & 8 & 10 \\ 
+            Temperature, T& $23 \pm 5 $ & $55 \pm 3 $ & $67 \pm 7 $ & $(8 \pm 1) \times 10^{1} $ & $88 \pm 5 $ & $96 \pm 6 $ \\ 
+        \bottomrule
+    \end{tabular}
+\end{table}
 ```
 which results in
 ![](https://github.com/CianLM/labtex/raw/master/figures/readmetable.png)
@@ -116,9 +118,9 @@ which results in
 Alternatively if an `upright` table is preferred, this may be specified through the `style` argument.
 ```python
 doc.table(
-    listheads = ["Voltage, V","Temperature, T"],
-    data = [voltages,temperatures],
-    caption = "Voltage Temperature Correlation",
+    nameandsymbol = ["Voltage, V", "Temperature, T"],
+    data = [voltages,temperatures**2],
+    caption = "Voltage and Temperature Sqaured Correlation",
     style = "upright"
 )
 ```
@@ -126,22 +128,22 @@ doc.table(
 Once again this inserts the following into the `doc` instance.
 ```latex
 \begin{table}[ht]
-        \centering
-        \caption{Voltage Temperature Correlation}
-        \label{tab:2}
-        \begin{tabular}{*{2}c}
-            \toprule
-            Voltage, V, $\pm$ 3 V  & Temperature, T, $\pm$ 20 C  \\ 
+    \centering
+    \caption{Voltage and Temperature Sqaured Correlation}
+    \label{tab:2}
+    \begin{tabular}{*{2}c}
+        \toprule
+        Voltage, V, ($\pm 1$ V)  & Temperature, T \\ 
             \midrule
-              1 & 20  \\
-              3 & 60  \\
-              5 & 70  \\
-              7 & 80  \\
-              8 & 90  \\
-              10& 100 \\
-            \bottomrule
-        \end{tabular}
-    \end{table}
+              1 & $(5 \pm 2) \times 10^{2} $  \\
+              3 & $(30 \pm 3) \times 10^{2} $  \\
+              5 & $(45 \pm 9) \times 10^{2} $  \\
+              7 & $(7 \pm 2) \times 10^{3} $  \\
+              8 & $(77 \pm 9) \times 10^{2} $  \\
+              10& $(9 \pm 1) \times 10^{3} $ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 ```
 which results in
 ![](https://github.com/CianLM/labtex/raw/master/figures/readmetable2.png)
@@ -169,7 +171,6 @@ doc.save("test")
 # labtex: Wrote to 'tex/test.tex'.
 ```
 
-
 ## Contributions
 
-Feel free to submit a pull request or reach out with feature suggestions.
+This package is under active development. Feel free to submit a pull request or reach out with feature suggestions.

@@ -3,6 +3,7 @@
 # Looking Forward
 
 - Interface with statistical packages for non-linear regression
+- Printing latex for the error propogation done
 - Documentation
 # v0.4.0
 

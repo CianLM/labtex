@@ -21,7 +21,7 @@ doc = Document(title = "Lab Report Template", author = "CianLM")
 doc.table(
     nameandsymbol = ["Voltage, V","Temperature, T"],
     data = [voltages,temperatures],
-    headers = ["Variables","Data"],
+    # headers = ["Variables","Data"],
     caption = "Voltage and Temperature Correlation"
 )
 
