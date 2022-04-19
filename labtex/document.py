@@ -1,5 +1,5 @@
 from labtex.linear import LinearRegression
-from labtex.measurement import MeasurementList
+from labtex.measurementlist import MeasurementList
 
 from typing import List, Union
 
@@ -7,13 +7,11 @@ import os
 
 class Document:
     "A class for LaTeX template document creation with tables and graphs already inserted."
-    def __init__(self,title : str,author : str):
-        "Initialise a LaTeX document with an title and an author."
         # Customise these folders and the templates as you wish.
-        Document.texfolder = "tex/"
-        Document.graphfolder = "figures/"
+    texfolder = "tex/"
+    graphfolder = "figures/"
 
-        Document.template = r"""\documentclass[]{article}
+    template = r"""\documentclass[]{article}
 
 \title{!title}
 \author{!author}
@@ -50,35 +48,37 @@ class Document:
 """
 
 
-        Document.tabletemplates = {
-            "default": r"""
-    \begin{table}[ht]
-        \centering
-        \caption{!caption}
-        \label{tab:!tablenumber}
-        \begin{tabular}{!columns}
-            \toprule
-            !data
-            \bottomrule
-        \end{tabular}
-    \end{table}
+    tabletemplates = {
+        "default": r"""
+\begin{table}[ht]
+    \centering
+    \caption{!caption}
+    \label{tab:!tablenumber}
+    \begin{tabular}{!columns}
+        \toprule
+        !data
+        \bottomrule
+    \end{tabular}
+\end{table}
 
-    !table
-    """
-        }
+!table
+"""
+    }
 
-        Document.graphtemplates = {
-            "default": r"""
-    \begin{figure}[ht]
-        \centering
-        \includegraphics[width=!width\textwidth]{!filename.png}
-        \caption{!caption}
-        \label{fig:!graphnumber}
-    \end{figure}
-    !graph
-    """
-        }
-        
+    graphtemplates = {
+        "default": r"""
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=!width\textwidth]{!filename.png}
+    \caption{!caption}
+    \label{fig:!graphnumber}
+\end{figure}
+!graph
+"""
+    }
+    
+    def __init__(self,title : str,author : str):
+        "Initialise a LaTeX document with an title and an author."
 
         self.document = Document.template.replace("!title",title).replace("!author",author)
         self.tablenumber = 0
@@ -87,12 +87,12 @@ class Document:
     def __repr__(self):
         return self.document
 
-    def table(self,listheads : List[str], data : List[MeasurementList], \
+    def table(self,nameandsymbol : List[str], data : List[MeasurementList], \
         headers :List[str] = [], caption : str = "",style : str = "sideways"):
         """
         Add a table to the LaTeX document. 
         """
-        assert len(listheads) == len(data)
+        assert len(nameandsymbol) == len(data)
         assert all(len(data[0]) == len(line) for line in data)
         columns = len(data[0])
 
@@ -106,7 +106,8 @@ class Document:
             raise Exception("Data Error: Data should be a list of Measurement Lists.")
 
         if(style == "sideways"):
-            table = table.replace("!columns", "*{" + str(1+columns) + "}c" )
+            # table = table.replace("!columns", "*{" + str(1+columns) + "}c" )
+            table = table.replace("!columns", f"c|{ 'c' * columns}" )
             if(headers != []):
                 table = table.replace("!data",
                 fr"""{headers[0]} & \multicolumn{{{columns}}}{{c}}{{{headers[1]}}} \\
@@ -115,21 +116,21 @@ class Document:
             for i in range(len(data)):
                 table = table.replace("!data",
                 fr"""
-            {listheads[i]}, { data[i].tableprint("uv") } \\ !data"""
+            {nameandsymbol[i]}{ data[i].tableprint() } \\ !data"""
                 )
 
         elif(style == "upright"):
             table = table.replace("!columns", "*{" + str(len(data)) + "}c" )
             for i in range(len(data)):
                 table = table.replace("!data",
-                fr"""{listheads[i]}, {data[i].tableprint("u")} & !data"""
+                fr"""{nameandsymbol[i]}{data[i].tableprint(novalues=True)} & !data"""
                 )
             table = table.replace("& !data",
             r"""\\ 
             \midrule
             !data"""
             )
-            tableprint = [m.tableprint("v")[1:].split("&") for m in data]
+            tableprint = [ml.tableprint(nounits=True)[1:].split("&") for ml in data]
             indexfirst = [ [index[j] for index in tableprint] for j in range(len(tableprint[0]))]
 
             for index in indexfirst:
@@ -137,9 +138,8 @@ class Document:
             rf""" {"&".join([*index])} \\
             !data""")
 
-
         else:
-            raise Exception("Style Error: Only 'sideways' and 'upright' styles supported.")
+            raise Exception("Style Error: Only 'sideways' and 'upright' styles are supported.")
 
 
         table = table.replace("!data","")
@@ -172,19 +172,22 @@ class Document:
 
         if (not os.path.exists(Document.graphfolder)):
             os.makedirs(Document.graphfolder)
-        eq.plot(title,xnameandsymbol,ynameandsymbol,showline,self.graphnumber)
-        eq.savefig(Document.graphfolder + filename)
+        plt = eq.plot(title,xnameandsymbol,ynameandsymbol,showline,self.graphnumber)
+        plt.savefig(Document.graphfolder + filename)
         print(f"labtex: Wrote to '{Document.graphfolder + filename}.png'.")
 
-    def save(self,filename: str ="labdocument"):
+    def save(self,filename: str ="labdocument",overwrite: bool = False):
         "Save the document to 'filename.tex'."
 
         self.document = self.document.replace("!table","").replace("!graph","")
 
         if(not os.path.exists(Document.texfolder)):
+            print("labtex: Creating folder '" + Document.texfolder + "'.")
             os.makedirs(Document.texfolder)
         if(os.path.exists(Document.texfolder + filename + ".tex")):
-            print(f"labtex: '{Document.texfolder + filename}.tex' already exists. Overwriting.")
+            print(f"labtex: '{Document.texfolder + filename}.tex' already exists. { 'Overwriting.' if overwrite else 'Use `save(...,overwrite=True)` to overwrite.'}")
+            if(not overwrite):
+                return
 
         with open(Document.texfolder + filename + '.tex','w') as outputfile:
             outputfile.write(self.document)

@@ -11,15 +11,15 @@ class Unit:
     baseUnits = ['m','g','s','A','K']
 
     derivedUnits = {
-    'J': ['kg m^2 s^-2', lambda x: x],
-    'V': ['kg m^2 s^-3 A^-1', lambda x: x],
-    'N': ['kg m s^-2', lambda x: x],
-    'W': ['kg m^2 s^-3', lambda x: x],
-    'T': ['kg s^-2 A^-1', lambda x: x],
-    'Pa': ['kg m^-1 s^-2', lambda x: x],
-    'Hz': ['s^-1', lambda x: x],
-    'C' : ['K', lambda x: x + 273.15],
-    'eV' : ['J', lambda x: x * 1.602176634e-19],
+    'J': ['kg m^2 s^-2'],
+    'V': ['kg m^2 s^-3 A^-1'],
+    'N': ['kg m s^-2'],
+    'W': ['kg m^2 s^-3'],
+    'T': ['kg s^-2 A^-1'],
+    'Pa': ['kg m^-1 s^-2'],
+    'Hz': ['s^-1'],
+    'C' : ['K'], # , lambda C: C + 273.15, lambda K: K - 273.15
+    'eV' : ['kg m^2 s^-2', 1.602176634e-19],
     
     }
 
@@ -34,7 +34,7 @@ class Unit:
     'u':1e-6,
     'm':1e-3,
     'c':1e-2,
-    '':1,
+    '' :1,
     'k':1e3,
     'M':1e6,
     'G':1e9,
@@ -43,10 +43,8 @@ class Unit:
     # 'E':1e18
     }
 
-
     def __init__(self,unitString: Union[str,dict]):
 
-        
         # Given user string input, parse the units, prefixes and powers
         if(type(unitString) == str):
             self.units = dict.fromkeys(Unit.knownUnits)
@@ -98,7 +96,7 @@ class Unit:
             if (unitmatch is None):
                 if (unitString[i] in ['(',')']):
                     raise Exception('labtex Unit Parsing Error: Parentheses are not supported. Use negative exponents or a \'/\' instead.')
-                if (unitString[i] != ' '):
+                if (unitString[i] not in [' ','1']):
                     raise Exception(f'labtex Unit Parsing Error: Unknown character: \'{unitString[i]}\'. If this is intended, you can add it to the base units/prefixes with `Unit.baseUnits` and `Unit.prefixes`.')
                 i += 1
                 continue
