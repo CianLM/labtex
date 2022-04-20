@@ -34,9 +34,9 @@ Single measurements can be instantiated with `Measurement(value,uncertainty,unit
 ```python
 x = Measurement(1.1,0.3,"m")
 y = Measurement(2.22,0.4,"m")
-z = Measurement(314,10,"V")
+z = M(314,10,"V")
 ```
-where `M` is shorthand for `Measurement`. Note that the unit parsing supports all combinations of common units, prefixes and powers of units, eg. any of "nm^2", "C^-1", "kg m^2 s^-2", "J^3" etc. are supported.
+where `M` is an equivalent shorthand for `Measurement`. Note that the unit parsing supports all combinations of common units, prefixes and powers of units, eg. any of "nm^2", "C^-1", "kg m^2 s^-2", "J^3" etc. are supported.
 
 Measurement instances support all operations (`+-*/` and `**`) as well as math functions with the error and units automatically propagated. Some examples are shown below.
 ```python
