@@ -8,7 +8,7 @@
 # v0.4.0
 
 New Features:
-- Unit Conversion of measurements between arbitrary units e.g. J to eV, mm^2 to m^2.
+- Unit conversion of measurements between arbitrary units e.g. J to eV, mm^2 to m^2.
 - Massive overhaul of unit parsing and `MeasurementList`s for extensibility and consistency.
 - Added "/" support e.g. "m/s" parses the same as "m s^-1"
 - Added elementwise uncertainties in `MeasurementList`s

@@ -17,7 +17,7 @@ setuptools.setup(
     url='https://github.com/CianLM/labtex',
     author='CianLM',
     packages=['labtex'],
-    install_requires=['matplotlib'],
+    install_requires=['matplotlib','numpy'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Intended Audience :: Science/Research",
