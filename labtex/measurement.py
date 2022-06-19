@@ -166,7 +166,7 @@ class Measurement:
             if(Unit.unitless(self.unit)):
                 return Measurement(
                     obj ** self.value,
-                    abs(obj ** self.value) * self.uncertainty,
+                    abs(obj ** self.value  * math.log(obj)) * self.uncertainty,
                     ""
                 )
             else:

@@ -42,7 +42,7 @@ class TestMeasurementListClass(unittest.TestCase):
             repr(heights ** 2), "[(34 ± 2) × 10^{3}, (33 ± 1) × 10^{3}, (33 ± 2) × 10^{3}, (38 ± 2) × 10^{3}, (34 ± 3) × 10^{3}, (31 ± 4) × 10^{3}] cm^2"
         )
         self.assertEqual(
-            repr( 10 ** (heights / maxheight)), "[8.4 ± 0.3, 8.2 ± 0.2, 8.1 ± 0.3, 9.3 ± 0.4, 8.3 ± 0.3, 7.7 ± 0.4] "
+            repr( 10 ** (heights / maxheight)), "[8.4 ± 0.7, 8.2 ± 0.6, 8.1 ± 0.6, 9.3 ± 0.8, 8.3 ± 0.8, 8 ± 1] "
         )
 
     def test_functions(self):
