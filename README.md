@@ -121,7 +121,7 @@ Alternatively if an `upright` table is preferred, this may be specified through 
 doc.table(
     nameandsymbol = ["Voltage, V", "Temperature, T"],
     data = [voltages,temperatures**2],
-    caption = "Voltage and Temperature Sqaured Correlation",
+    caption = "Voltage and Temperature Squared Correlation",
     style = "upright"
 )
 ```
@@ -130,7 +130,7 @@ Once again this inserts the following into the `doc` instance.
 ```latex
 \begin{table}[ht]
     \centering
-    \caption{Voltage and Temperature Sqaured Correlation}
+    \caption{Voltage and Temperature Squared Correlation}
     \label{tab:2}
     \begin{tabular}{*{2}c}
         \toprule
@@ -166,7 +166,7 @@ This generates the graph below and saves it to `figures/graph1.png`. If you want
 
 ![](https://github.com/CianLM/labtex/raw/master/figures/graph1.png)
 
-Once you have added all your tables and graphs to the `doc` object, you may save this file as shown below. The default write directory is `tex/` relative to root. This directory is also customisable with `Document.texfolder`.
+Once you have added all your tables and graphs to the `doc` object, you may save this file as shown below. The default write directory is `tex/` relative to root. This directory is also customizable with `Document.texfolder`.
 
 ```python
 doc.save("test")

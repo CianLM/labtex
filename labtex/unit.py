@@ -1,4 +1,5 @@
 import re
+from numbers import Number
 from typing import Union
 import math
 
@@ -31,7 +32,8 @@ class Unit:
     # 'f':1e-15,
     'p':1e-12,
     'n':1e-9,
-    'u':1e-6,
+    'u':1e-6, # u \approx µ for usability
+    'µ':1e-6,
     'm':1e-3,
     'c':1e-2,
     '' :1,
@@ -75,6 +77,7 @@ class Unit:
         # Match a known unit
         # Compiles to '([JVNWTmgsACK]|(?:Pa)|(?:Hz))' for default (base + derived) units
         unit = re.compile(f"([{''.join([ unit_str if len(unit_str) == 1 else '' for unit_str in Unit.knownUnits])}]|{'|'.join([ ('(?:' + unit_str + ')') for unit_str in filter(lambda x: len(x) > 1, Unit.knownUnits) ])})") 
+        # print(unit)
         # Match a '^' followed optionally by '-' and then any number of digits
         power = re.compile('(\^)(\-?)(\d+)')
         # power = re.compile(r'\^(?:-?\d+)')
@@ -129,12 +132,25 @@ class Unit:
         else:
             return False
 
+    @staticmethod
+    def addUnit(symbol : str, SI_equivalent : str, constant_factor : float = 1):
+        # inefficient but functional
+        Unit.derivedUnits[symbol] = [SI_equivalent, constant_factor]
+        Unit.knownUnits += [symbol]
 
-    def __eq__(self,obj):
+
+
+    # def __eq__(self,obj):
+    #     "Check if two Units are the same."
+    #     if (isinstance(obj,Unit)):
+    #         return all(self.units[unit] == obj.units[unit] for unit in Unit.knownUnits)
+    #     return False
+
+    def __eq__(self, obj):
         "Check if two Units are the same."
-        if (isinstance(obj,Unit)):
-            return all(self.units[unit] == obj.units[unit] for unit in Unit.knownUnits)
-        return False
+        obj = obj if isinstance(obj,Unit) else Unit(obj)
+        return factorandbasedims(self) == factorandbasedims(obj) if isinstance(obj,Unit) else False
+        
 
     def __mul__(self,obj):
         "Multiply two Units."
@@ -153,10 +169,12 @@ class Unit:
                         "power": self.units[unit]["power"] + obj.units[unit]["power"]
                         }
                 else:
-                    raise Exception("Units have different prefixes. Multiplication not supported.")
+                    raise Exception("Units have different prefixes. Multiplication not supported as constant factors arise..")
             return Unit(newunits)
-        else:
+        elif(isinstance(obj,Number)):
             return self
+        else:
+            return NotImplemented
 
     def __rmul__(self,obj):
         return self.__mul__(obj)
@@ -177,7 +195,7 @@ class Unit:
                         "power": self.units[unit]["power"] - obj.units[unit]["power"]
                         }
                 else:
-                    raise Exception("Measurements have different prefixes. Division not supported.")
+                    raise Exception("Measurements have different prefixes. Division not supported as constant factors arise.")
             return Unit(newunits)
         else:
             return self.__mul__(1/obj)
@@ -203,4 +221,25 @@ class Unit:
         return Unit(newunits)
 
 class U(Unit):
+    "SI Unit taking in a string."
     pass
+
+def factorandbasedims(unit):
+    factor = 1
+    basedims = { unit : 0 for unit in Unit.baseUnits }
+    for dim in unit.units:
+        if unit.units[dim]['power'] != 0 and dim in Unit.derivedUnits:
+            if len(Unit.derivedUnits[dim]) == 2:
+                factor *= (Unit.derivedUnits[dim][1]) ** unit.units[dim]['power']
+            # print('Derived unit: ' + str(dim))
+            factor *= Unit.prefixes[unit.units[dim]['prefix']] ** unit.units[dim]['power']
+            equivalentunits = Unit(Unit.derivedUnits[dim][0]).units
+            for baseUnit in Unit.baseUnits: # as all equivalent units are base units
+                # print('Base unit: ' + str(baseUnit) + 'power: ' + str(equivalentunits[baseUnit]['power']))
+                basedims[baseUnit] += equivalentunits[baseUnit]['power'] * unit.units[dim]['power']
+                factor *= Unit.prefixes[equivalentunits[baseUnit]['prefix']]**(equivalentunits[baseUnit]['power'] * unit.units[dim]['power'])
+        elif dim in Unit.baseUnits:
+            # print('Base unit: ' + str(dim))
+            basedims[dim] += unit.units[dim]['power']
+            factor *= Unit.prefixes[unit.units[dim]['prefix']]**unit.units[dim]['power']
+    return factor, basedims

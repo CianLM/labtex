@@ -2,13 +2,15 @@ import math
 from numbers import Number
 from typing import Union
 from labtex.unit import Unit
+from labtex.unit import factorandbasedims
 
 class Measurement:
+    "Base Class for all single valued measurements with uncertainties and SI units."
     def __init__(self, value: float, uncertainty: float = 0, unit: Union[Unit,str] = ""):
         "Create a measurement with a value, uncertainty and SI Unit."
         self.value = value
         self.uncertainty = uncertainty
-        self.relativeuncertainty = self.uncertainty / self.value
+        self.relativeuncertainty = self.uncertainty / self.value if self.value != 0 else 0
 
         self.unit = unit if (isinstance(unit,Unit)) else Unit(unit)
     
@@ -151,10 +153,21 @@ class Measurement:
 
     def __pow__(self,obj):
         "Raising a measurement to a constant power."
+        if(isinstance(obj,Measurement)):
+            if(Unit.unitless(obj.unit)):
+                return Measurement(
+                    self.value ** obj.value,
+                     abs(self.value ** obj.value) * math.sqrt(
+                        (obj.value * self.relativeuncertainty)**2 + (math.log(obj.value) * obj.uncertainty)**2
+                        ),
+                    self.unit ** obj.value
+                )
+            else:
+                raise Exception("Cannot raise a constant to a dimensional quantity. Units: " + str(self.unit))
         if(isinstance(obj,Number)):
             return Measurement(
                 self.value ** obj,
-                (self.value ** obj) * abs(obj) * self.relativeuncertainty,
+                abs(self.value ** obj * obj) * self.relativeuncertainty,
                 self.unit ** obj
             )
         else:
@@ -206,7 +219,7 @@ class Measurement:
         if(Unit.unitless(x.unit)):
             return Measurement(
                 math.tan(x.value),
-                math.fabs( 1 / math.cos(x.value)**2 ) * x.uncertainty,
+                x.uncertainty / math.cos(x.value)**2 ,
                 ""
             )
         else:
@@ -254,7 +267,7 @@ class Measurement:
         if(Unit.unitless(x.unit)):
             return Measurement(
                 math.atan(x.value),
-                x.uncertainty / (math.sqrt(1 - x.value**2)),
+                x.uncertainty / (math.sqrt(1 + x.value**2)),
                 ""
             )
         else:
@@ -277,23 +290,6 @@ class Measurement:
             raise Exception(f"Dimension Error: Cannot convert from {self.unit} to {unit} because they have different dimensions.")
         
 class M(Measurement):
+    "Base Class for all single valued measurements with uncertainties and SI units."
     pass
 
-def factorandbasedims(unit : Unit):
-    factor = 1
-    basedims = { unit : 0 for unit in Unit.baseUnits }
-    for dim in unit.units:
-        if unit.units[dim]['power'] != 0 and dim in Unit.derivedUnits:
-            if len(Unit.derivedUnits[dim]) == 2:
-                factor *= Unit.derivedUnits[dim][1] ** unit.units[dim]['power']
-            # print('Derived unit: ' + str(dim))
-            equivalentunits = Unit(Unit.derivedUnits[dim][0]).units
-            for baseUnit in Unit.baseUnits: # as all equivalent units are base units
-                # print('Base unit: ' + str(baseUnit) + 'power: ' + str(equivalentunits[baseUnit]['power']))
-                basedims[baseUnit] += equivalentunits[baseUnit]['power'] * unit.units[dim]['power']
-                factor *= Unit.prefixes[equivalentunits[baseUnit]['prefix']]**(equivalentunits[baseUnit]['power'] * unit.units[dim]['power'])
-        elif dim in Unit.baseUnits:
-            # print('Base unit: ' + str(dim))
-            basedims[dim] += unit.units[dim]['power']
-            factor *= Unit.prefixes[unit.units[dim]['prefix']]**unit.units[dim]['power']
-    return factor, basedims

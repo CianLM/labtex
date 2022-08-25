@@ -21,7 +21,6 @@ class MeasurementList:
     `>>> MeasurementList( 
      ... [Measurement(1,0.1,"m"),Measurement(2,0.2,"m"),Measurement(3,0.3,"m")]
      ... )`
-
     """
     def __init__(self,measurements: Union[List[Number],List[Measurement]], uncertainty: Union[Number,List] = math.nan, unit: Union[Unit,str] = ""):
         
@@ -79,15 +78,23 @@ class MeasurementList:
     def uncertainties(self):
         return [measurement.uncertainty for measurement in self]
     
-    def append(self,obj):
+    # mutating
+    def concat(self,obj):
+        "Non-mutating concatenation of a Measurement/MeasurementList to the current MeasurementList."
         if(isinstance(obj,MeasurementList)):
-            return MeasurementList([*[measurement for measurement in self], *[measurement for measurement in obj]])
+            if(self.unit == obj.unit):
+                return  MeasurementList([*[measurement for measurement in self], *[measurement for measurement in obj]])
+            else:
+                raise Exception("MeasurementList Error: Cannot append two MeasurementLists with different units.")
         elif(isinstance(obj,Measurement)):
-            return MeasurementList([*[measurement for measurement in self], obj])
+            if(self.unit == obj.unit):
+                return MeasurementList([*[measurement for measurement in self], obj])
+            else:
+                raise Exception("MeasurementList Error: Cannot append a MeasurementList and a Measurement with different units.")
         else:
             raise Exception(f"Object of type {type(obj)} cannot be appended to a MeasurementList. Try a MeasurementList or a Measurement.")
 
-            
+        
     def __add__(self,obj):
         "Elementwise addition of two MeasurementLists. If a Measurement is added, it is added to all Measurements in the list."
         if(isinstance(obj,MeasurementList)):
@@ -163,6 +170,11 @@ class MeasurementList:
             [obj ** measurement for measurement in self]
         )
 
+    def to(self,unit : str):
+        return MeasurementList(
+            [measurement.to(unit) for measurement in self]
+        )
+
     @staticmethod
     def sin(x):
         return MeasurementList(
@@ -206,4 +218,20 @@ class MeasurementList:
         )
 
 class ML(MeasurementList):
+    """An extension of the measurement class to take list values. Can be instantiated in a number of ways:
+    - Using lists for the values and the uncertainty
+    
+    `>>> MeasurementList([1,2,3],[0.1,0.2,0.3],"m")`
+
+    - Using lists for the values and a single uncertainty for all measurements
+
+    `>>> MeasurementList([1,2,3],0.1,"m")`
+
+    - Using A list of `Measurement` instances
+
+    `>>> MeasurementList( 
+     ... [Measurement(1,0.1,"m"),Measurement(2,0.2,"m"),Measurement(3,0.3,"m")]
+     ... )`
+
+    """
     pass

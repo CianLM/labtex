@@ -2,12 +2,17 @@
 
 # Looking Forward
 
+- Computer Modern Plot font
+- CSV data import workflow
+- Numpy input integration
 - Interface with statistical packages for non-linear regression
-- Printing latex for the error propogation done
+- Printing latex for the error propagation done
 - Documentation
 
 # v0.4.1
-- Fixed exponential error propogation
+- Documentation/guides coming very soon
+- Fixed exponential and inverse tangent error propagation
+- Fixed other minor bugs
 # v0.4.0
 
 New Features:

@@ -41,7 +41,7 @@ class TestMeasurementClass(unittest.TestCase):
         self.assertEqual( repr(Measurement.log(x/y)), "-0.7 ± 0.3 ")
         self.assertEqual( repr(Measurement.asin(x/y)), "0.5 ± 0.2 ")
         self.assertEqual( repr(Measurement.acos(x/y)), "1.1 ± 0.2 ")
-        self.assertEqual( repr(Measurement.atan(x/y)), "0.5 ± 0.2 ")
+        self.assertEqual( repr(Measurement.atan(x/y)), "0.5 ± 0.1 ")
 
     def test_conversion(self):
         self.assertEqual( repr(Measurement(2,1,'cm^3').to('m^3')), "(2 ± 1) × 10^{-6} m^3")
