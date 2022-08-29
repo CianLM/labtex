@@ -96,14 +96,14 @@ class Measurement:
         if(isinstance(obj,Measurement)):
             return Measurement(
                 self.value * obj.value,
-                (self.value * obj.value) * math.hypot(self.relativeuncertainty, obj.relativeuncertainty),
+                abs(self.value * obj.value) * math.hypot(self.relativeuncertainty, obj.relativeuncertainty),
                 self.unit * obj.unit
             )
 
         if(isinstance(obj,Number)):
             return Measurement(
                 self.value * obj,
-                self.uncertainty * obj,
+                self.uncertainty * abs(obj),
                 self.unit
             )
         else:
@@ -127,7 +127,7 @@ class Measurement:
         if(isinstance(obj,Measurement)):
             return Measurement(
                 self.value / obj.value,
-                (self.value / obj.value) * math.hypot(self.relativeuncertainty,obj.relativeuncertainty),
+                abs(self.value / obj.value) * math.hypot(self.relativeuncertainty,obj.relativeuncertainty),
                 self.unit / obj.unit
             )
 
@@ -141,7 +141,7 @@ class Measurement:
             return NotImplemented
 
     def __rtruediv__(self,obj):
-        "Reverse division to accomodate constant / measurement."
+        "Reverse division to accommodate constant / measurement."
         if(isinstance(obj,Number)):
             return Measurement(
                 obj / self.value,
@@ -231,7 +231,7 @@ class Measurement:
         if(Unit.unitless(x.unit)):
             return Measurement(
                 math.log(x.value),
-                x.relativeuncertainty,
+                math.fabs(x.relativeuncertainty),
                 ""
             )
         else:

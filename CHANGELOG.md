@@ -9,6 +9,9 @@
 - Printing latex for the error propagation done
 - Documentation
 
+
+# v0.4.3
+- Fixed negative error propagation bug
 # v0.4.1
 - Documentation/guides coming very soon
 - Fixed exponential and inverse tangent error propagation
