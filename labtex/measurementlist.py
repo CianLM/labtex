@@ -58,8 +58,13 @@ class MeasurementList:
                 if(not novalues):
                     tableprint += f"& { r' & '.join([ str(round(round(measurement.value),sigdigits)) for measurement in self ] ) }"
         else:
+            if(not nounits):
+                tableprint += f", ({self.unit}) " if not Unit.unitless(self.unit) else ""
             if(not novalues):
-                tableprint += f"& ${ r'$ & $'.join([str(measurement)[:-len(str(measurement.unit))] for measurement in self ] ) }$"
+                if(len(str(self.unit)) == 0): # 0 breaks python indexing
+                    tableprint += f"& ${ r'$ & $'.join([str(measurement) for measurement in self ] ) }$"
+                else:
+                    tableprint += f"& ${ r'$ & $'.join([str(measurement)[:-len(str(measurement.unit))] for measurement in self ] ) }$"
 
         return tableprint.replace('±','\pm').replace('×','\\times')
 

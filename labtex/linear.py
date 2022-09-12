@@ -5,7 +5,15 @@ import matplotlib.pyplot as plt
 from numpy import array
 
 plt.style.use('seaborn-whitegrid')
-
+plt.rcParams.update({
+    "text.usetex" : True,
+    "font.family" : "serif",
+    "font.size" : 12,
+    "figure.autolayout" : True,
+    "legend.framealpha": 1.0,
+    # resolution
+    # "figure.dpi" : 200,
+})
 
 class LinearRegression:
     "Linearly regress two MeasurementLists."

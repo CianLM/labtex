@@ -79,7 +79,8 @@ class Document:
     
     def __init__(self,title : str,author : str):
         "Initialise a LaTeX document with an title and an author."
-
+        self.title = title
+        self.author = author
         self.document = Document.template.replace("!title",title).replace("!author",author)
         self.tablenumber = 0
         self.graphnumber = 0
@@ -98,12 +99,13 @@ class Document:
 
         table = Document.tabletemplates["default"]
         self.tablenumber += 1
+        print(f"labtex: Adding table {self.tablenumber} to Document '{self.title}'.")
 
         table = table.replace("!tablenumber", str(self.tablenumber))
         table = table.replace("!caption",caption)
 
         if not (all(isinstance(line, MeasurementList) for line in data)):
-            raise Exception("Data Error: Data should be a list of Measurement Lists.")
+            raise Exception("Data Error: Data should be a list of MeasurementLists.")
 
         if(style == "sideways"):
             # table = table.replace("!columns", "*{" + str(1+columns) + "}c" )
@@ -174,7 +176,7 @@ class Document:
             os.makedirs(Document.graphfolder)
         plt = eq.plot(title,xnameandsymbol,ynameandsymbol,showline,self.graphnumber)
         plt.savefig(Document.graphfolder + filename)
-        print(f"labtex: Wrote to '{Document.graphfolder + filename}.png'.")
+        print(f"labtex: Wrote to '{Document.graphfolder + filename}.png' and added to Document '{self.title}'.")
 
     def save(self,filename: str ="labdocument",overwrite: bool = False):
         "Save the document to 'filename.tex'."

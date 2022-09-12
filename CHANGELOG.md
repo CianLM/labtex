@@ -2,14 +2,14 @@
 
 # Looking Forward
 
-- Computer Modern Plot font
 - CSV data import workflow
 - Numpy input integration
 - Interface with statistical packages for non-linear regression
-- Printing latex for the error propagation done
-- Documentation
 
-
+# v0.5.0
+- New extensive ![Documentation](https://www.cianlm.dev/labtex)! Examples and guides to be added in future updates.
+- Improved plot appearance with latex-style font
+- Fixed table bugs when dimensionless quantities are involved
 # v0.4.3
 - Fixed negative error propagation bug
 # v0.4.1
