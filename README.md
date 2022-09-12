@@ -4,7 +4,7 @@
 ![Tests](https://github.com/CianLM/labtex/actions/workflows/python-publish.yml/badge.svg)
 ![License](https://img.shields.io/github/license/cianlm/labtex)
 
-New extensive ![Documentation](https://www.cianlm.dev/labtex)!
+New extensive [Documentation](https://www.cianlm.dev/labtex)!
 ## Purpose
 
 This package provides a single solution to repetitive analysis tasks in a lab environment. If you are doing error propagation, linear regression or LaTeX tables/figures manually, this package automates the process.
