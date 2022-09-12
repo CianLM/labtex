@@ -1,4 +1,8 @@
 # labtex
+[![](https://img.shields.io/badge/Documentation-007ec6.svg)](https://www.cianlm.dev/labtex)
+[![PyPI](https://img.shields.io/pypi/v/labtex)](https://pypi.org/project/labtex/)
+![Tests](https://github.com/CianLM/labtex/actions/workflows/python-publish.yml/badge.svg)
+![License](https://img.shields.io/github/license/cianlm/labtex)
 
 ## Purpose
 
