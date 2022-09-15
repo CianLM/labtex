@@ -1,9 +1,11 @@
 from labtex.linear import LinearRegression
 from labtex.measurementlist import MeasurementList
 
-from typing import List, Union
+from typing import Any, List, Union
 
 import os
+
+from labtex.nonlinear import NonLinearRegression
 
 class Document:
     "A class for LaTeX template document creation with tables and graphs already inserted."
@@ -149,7 +151,7 @@ class Document:
 
     def graph(self, data : List[MeasurementList], title : str = "", xnameandsymbol : str = "Name, Symbol", \
         ynameandsymbol : str = "Name, Symbol", caption : str = "", width : float = 0.8, style : str = "default", \
-        showline : bool = True):
+        showline : bool = True, nonlinear_func : any = None, nonlinear_params : List[str] = []):
         "Add a graph to the LaTeX document."
         graph = Document.graphtemplates[style]
         self.graphnumber += 1
@@ -162,7 +164,7 @@ class Document:
         ):
             raise Exception("2 MeasurementLists needed for graphing.")
 
-        eq = LinearRegression(*data)
+        eq = NonLinearRegression(nonlinear_func,*data,nonlinear_params) if nonlinear_func else LinearRegression(*data)
         filename = f"graph{self.graphnumber}"
 
         if(Document.graphfolder != '.'): # assuming the graph folder is a subfolder

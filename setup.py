@@ -15,9 +15,12 @@ setuptools.setup(
     long_description=README,
     long_description_content_type='text/markdown',
     url='https://github.com/CianLM/labtex',
+    project_urls={
+        "Documentation" : "https://www.cianlm.dev/labtex",
+    },
     author='CianLM',
     packages=['labtex'],
-    install_requires=['matplotlib','numpy'],
+    install_requires=['matplotlib','numpy','scipy'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Intended Audience :: Science/Research",
