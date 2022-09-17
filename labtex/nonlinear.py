@@ -6,7 +6,14 @@ import matplotlib.pyplot as plt
 from numpy import array, linspace
 from scipy.optimize import curve_fit
 
-plt.style.use('seaborn-whitegrid')
+plt.style.use('seaborn-muted')
+# seaborn-whitegrid
+# seaborn-muted
+# seaborn-dark-palette
+# seaborn-darkgrid
+# seaborn-talk / seaborn-paper / seaborn-poster / seaborn-notebook
+# ggplot
+# bmh
 plt.rcParams.update({
     "text.usetex" : True,
     "font.family" : "serif",
@@ -14,7 +21,7 @@ plt.rcParams.update({
     "figure.autolayout" : True,
     "legend.framealpha": 1.0,
     # resolution
-    # "figure.dpi" : 200,
+    "figure.dpi" : 300,
 })
 
 class NonLinearRegression:
@@ -38,17 +45,17 @@ class NonLinearRegression:
         yvals = self.y.values()
         plt.figure(graphnumber)
         plt.errorbar(xvals, yvals, yerr = self.y.uncertainties(),fmt='o')
+        plt.autoscale(enable=True, axis='x', tight=True)
         if showline:
-            xspace = linspace(min(xvals), max(xvals), 100)
+            # extend +- 10% of the range
+            rangex = max(xvals) - min(xvals)
+            xspace = linspace(min(xvals) - 0.1 * rangex, max(xvals) + 0.1 * rangex, 100)
             plt.plot(xspace, [
                 self.func(x, *self.optimal_params) for x in xspace
                 ])
-            plt.plot(xspace, [
-            self.func(x, *(self.optimal_params - self.param_uncertainties)) for x in xspace
-            ], '--')
-            plt.plot(xspace, [
-            self.func(x, *(self.optimal_params + self.param_uncertainties)) for x in xspace
-            ], '--')
+            minyspace = [self.func(x, *(self.optimal_params - self.param_uncertainties)) for x in xspace]
+            maxyspace = [self.func(x, *(self.optimal_params + self.param_uncertainties)) for x in xspace]
+            plt.fill_between(xspace, minyspace, maxyspace, alpha=0.2)
         
         plt.title(title)
         plt.xlabel(xnameandsymbol + f"{', ($ ' + str(self.x.unit) + '$)' if self.x.unit != '' else ''}")

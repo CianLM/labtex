@@ -2,9 +2,9 @@ from labtex.measurement import Measurement
 from labtex.measurementlist import MeasurementList
 
 import matplotlib.pyplot as plt 
-from numpy import array
+from numpy import array, linspace
 
-plt.style.use('seaborn-whitegrid')
+# plt.style.use('seaborn-whitegrid')
 plt.rcParams.update({
     "text.usetex" : True,
     "font.family" : "serif",
@@ -12,7 +12,7 @@ plt.rcParams.update({
     "figure.autolayout" : True,
     "legend.framealpha": 1.0,
     # resolution
-    # "figure.dpi" : 200,
+    "figure.dpi" : 300,
 })
 
 class LinearRegression:
@@ -54,8 +54,17 @@ class LinearRegression:
     def plot(self, title: str = "", xnameandsymbol : str = "", ynameandsymbol: str = "", showline : bool = True, graphnumber : int = 0):
         plt.figure(graphnumber)
         plt.errorbar(self.x.values(),self.y.values(), yerr = self.y.uncertainties(),fmt='o')
+        plt.autoscale(enable=True, axis='x', tight=True)
         if showline:
-            plt.plot(self.x.values(), (self.x * self.lobf["m"].value + self.lobf["c"].value).values() )
+            xvals = self.x.values()
+            rangex = max(xvals) - min(xvals)
+            xspace = linspace(min(xvals) - 0.1 * rangex, max(xvals) + 0.1 * rangex, 100)
+            plt.plot(xspace, xspace * self.lobf["m"].value + self.lobf["c"].value)
+            plt.fill_between(xspace,
+             xspace * (self.lobf["m"].value + self.lobf["m"].uncertainty) + self.lobf["c"].value + self.lobf["c"].uncertainty,
+             xspace * (self.lobf["m"].value - self.lobf["m"].uncertainty) + self.lobf["c"].value - self.lobf["c"].uncertainty,
+             alpha=0.2
+            )
         plt.title(title)
         plt.xlabel(xnameandsymbol + f"{', ($ ' + str(self.x.unit) + '$)' if self.x.unit != '' else ''}")
         plt.ylabel(ynameandsymbol + f"{', ($ ' + str(self.y.unit) + '$)' if self.y.unit != '' else ''}")
