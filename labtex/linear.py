@@ -51,18 +51,18 @@ class LinearRegression:
     def __repr__(self):
         return f"m = {self.lobf['m']}\nc = {self.lobf['c']}"
 
-    def plot(self, title: str = "", xnameandsymbol : str = "", ynameandsymbol: str = "", showline : bool = True, graphnumber : int = 0):
+    def plot(self, title: str = "", xnameandsymbol : str = "", ynameandsymbol: str = "", showline : bool = True, graphnumber : int = 0, *args, **kwargs):
         plt.figure(graphnumber)
-        plt.errorbar(self.x.values(),self.y.values(), yerr = self.y.uncertainties(),fmt='o')
+        plt.errorbar(self.x.values(),self.y.values(), yerr = self.y.uncertainties(),fmt='o', *args, **kwargs)
         plt.autoscale(enable=True, axis='x', tight=True)
         if showline:
             xvals = self.x.values()
             rangex = max(xvals) - min(xvals)
             xspace = linspace(min(xvals) - 0.1 * rangex, max(xvals) + 0.1 * rangex, 100)
-            plt.plot(xspace, xspace * self.lobf["m"].value + self.lobf["c"].value)
+            plt.plot(xspace, xspace * self.lobf["m"].value + self.lobf["c"].value, label = "Predicted")
             plt.fill_between(xspace,
-             xspace * (self.lobf["m"].value + self.lobf["m"].uncertainty) + self.lobf["c"].value + self.lobf["c"].uncertainty,
-             xspace * (self.lobf["m"].value - self.lobf["m"].uncertainty) + self.lobf["c"].value - self.lobf["c"].uncertainty,
+             xspace * (self.lobf["m"].value + self.lobf["m"].uncertainty * (1 - 2 *(xspace < 0)) ) + self.lobf["c"].value + self.lobf["c"].uncertainty,
+             xspace * (self.lobf["m"].value - self.lobf["m"].uncertainty * (1 - 2 * (xspace < 0)) ) + self.lobf["c"].value - self.lobf["c"].uncertainty,
              alpha=0.2
             )
         plt.title(title)

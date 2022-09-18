@@ -151,7 +151,8 @@ class Document:
 
     def graph(self, data : List[MeasurementList], title : str = "", xnameandsymbol : str = "Name, Symbol", \
         ynameandsymbol : str = "Name, Symbol", caption : str = "", width : float = 0.8, style : str = "default", \
-        showline : bool = True, nonlinear_func : any = None, nonlinear_params : List[str] = []):
+        showline : bool = True, nonlinear_func : any = None, nonlinear_params : List[str] = [], \
+        *args, **kwargs):
         "Add a graph to the LaTeX document."
         graph = Document.graphtemplates[style]
         self.graphnumber += 1
@@ -176,7 +177,7 @@ class Document:
 
         if (not os.path.exists(Document.graphfolder)):
             os.makedirs(Document.graphfolder)
-        plt = eq.plot(title,xnameandsymbol,ynameandsymbol,showline,self.graphnumber)
+        plt = eq.plot(title,xnameandsymbol,ynameandsymbol,showline,self.graphnumber,*args, **kwargs)
         plt.savefig(Document.graphfolder + filename)
         print(f"labtex: Wrote to '{Document.graphfolder + filename}.png' and added to Document '{self.title}'.")
 

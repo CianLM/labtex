@@ -1,5 +1,8 @@
+import math
 from labtex import *
 import unittest
+import numpy as np
+import matplotlib.pyplot as plt
 
 # Two MeasurementLists to be used in the rest of the tests
 voltages = MeasurementList([1.3,3,5,7,8.5,10],1,"V")
@@ -12,8 +15,8 @@ def func(x,A,B):
     return A*x**0.5 + B
 
 sqeq = NonLinearRegression(func,voltages,temperatures)
-plt = sqeq.plot()
-# plt.show()
+plot = sqeq.plot()
+plot.show()
 
 
 class TestLinearRegression(unittest.TestCase):
@@ -21,6 +24,21 @@ class TestLinearRegression(unittest.TestCase):
         self.assertEqual(
             LinearRegression.__repr__(eq), "m = 7 ± 1 V^{-1} K\nc = 27 ± 7 K"
         )
+
+import pandas as pd
+def func2(x,a,b,c,d):
+    return b*(np.cos(c*x) * np.exp(-x/a)) + d
+df = pd.read_excel('test/rabi_data.xlsx',sheet_name = 'data')
+df["y"] = df["y"] - min(df["y"])
+
+t = MeasurementList(df["x"],1,"ns")
+probability = MeasurementList(df["y"], 0.05, "")
+
+op = NonLinearRegression(func2,t,probability, init_params=(1e2,0.5,1e-2,0.4) )
+plt = op.plot(label="Data")
+plt.legend()
+# plt.show()
+plt.savefig("figures/rabi.png")
 
 class TestNonLinearRegression(unittest.TestCase):
     def test_nlr_repr(self):
@@ -61,7 +79,7 @@ doc.graph(
     ynameandsymbol = "Temperature, T",
     caption = "Non-Linear Regression of Voltage and Temperature",
     nonlinear_func = func,
-    nonlinear_params = [1,1]
+    # nonlinear_params = [1,1]
 )
 
 doc.graph(
