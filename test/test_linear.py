@@ -1,4 +1,5 @@
 import math
+from re import template
 from labtex import *
 import unittest
 import numpy as np
@@ -16,7 +17,7 @@ def func(x,A,B):
 
 sqeq = NonLinearRegression(func,voltages,temperatures)
 plot = sqeq.plot()
-plot.show()
+# plot.show()
 
 
 class TestLinearRegression(unittest.TestCase):
@@ -35,10 +36,10 @@ t = MeasurementList(df["x"],1,"ns")
 probability = MeasurementList(df["y"], 0.05, "")
 
 op = NonLinearRegression(func2,t,probability, init_params=(1e2,0.5,1e-2,0.4) )
-plt = op.plot(label="Data")
+plt = op.plot(label="Data",graphnumber=4)
 plt.legend()
-# plt.show()
 plt.savefig("figures/rabi.png")
+# plt.show()
 
 class TestNonLinearRegression(unittest.TestCase):
     def test_nlr_repr(self):
@@ -48,46 +49,57 @@ class TestNonLinearRegression(unittest.TestCase):
 
 # Template file creation is hard to test as it involves file creation, so this portion is tested manually.
 # Latex template creation
-doc = Document(title = "Lab Report Template", author = "CianLM")
+doc = Document(title = "Lab Report Template", author = "CianLM", filename='test', silent=False)
 
-doc.table(
-    nameandsymbol = ["Voltage, V","Temperature, T", 'testset'],
-    data = [voltages,temperatures,testset],
+# print(doc.check_file_not_in_use("tex/t.tex"))
+
+doc.add_table(
+    nameandsymbols = ["Voltage, V","Temperature, T"],
+    data = [voltages,temperatures],
     # headers = ["Variables","Data"],
-    caption = "Voltage and Temperature Correlation"
+    caption = "Voltage and Temperature Correlation",
 )
 
-doc.table(
-    nameandsymbol = ["Voltage, V", "Temperature, T", "Testset"],
-    data = [voltages,temperatures,testset],
+doc.add_table(
+    nameandsymbols = ["Voltage, V", "Temperatures", "Testset"],
+    data = [voltages,testset,testset],
     caption = "Voltage and Temperature Squared Correlation",
     style = "upright"
 )
 
-doc.graph(
+doc.add_table(
+    nameandsymbols = ["Voltage, V", "Testset (dimless)", "Testset"],
+    data = [voltages,temperatures,testset],
+    caption = "Voltage and Temperature Squared Correlation",
+    style = "upright",
+    label = "custom_label"
+)
+
+
+doc.add_figure(
     data = [voltages,temperatures],
     title = "Voltage and Temperature Plot",
-    xnameandsymbol = "Voltage, V",
-    ynameandsymbol = "Temperature, T",
+    xlabel = "Voltage, V",
+    ylabel = "Temperature, T",
     caption = "Linear Regression of Voltage and Temperature"
 )
 
-doc.graph(
+doc.add_figure(
     data = [voltages,temperatures],
-    title = "Non-Linear Curve Fit Voltage and Temperature Plot",
-    xnameandsymbol = "Voltage, V",
-    ynameandsymbol = "Temperature, T",
-    caption = "Non-Linear Regression of Voltage and Temperature",
+    title = "Non-Linear ($\sqrt{x}$) Curve Fit Voltage and Temperature Plot",
+    xlabel = "Voltage, V",
+    ylabel = "Temperature, T",
+    caption = "Non-linear ($\sqrt{x}$) Regression of Voltage and Temperature",
     nonlinear_func = func,
     # nonlinear_params = [1,1]
 )
 
-doc.graph(
-    data = [voltages,temperatures**2],
-    title = "Voltage and Temperature Squared Plot",
-    xnameandsymbol = "Voltage, V",
-    ynameandsymbol = "Temperature$^2$, $T^2$",
-    caption = "Linear Regression of Voltage and Temperature"
+doc.add_figure(
+    data = [voltages,temperatures**3],
+    title = "Voltage and Temperature Cubed Plot",
+    xlabel = "Voltage, V",
+    ylabel = "Temperature$^3$, $T^3$",
+    caption = "Linear Regression of Voltage and Temperature Cubed"
 )
 
-doc.save("test",overwrite=True)
+doc.save(overwrite=True)

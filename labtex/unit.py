@@ -3,9 +3,6 @@ from numbers import Number
 from typing import Union
 import math
 
-# TODO
-# MeasurementList type compatability
-
 class Unit:
     "SI Unit taking in a string."
     # Not Supported: mol (moles), cd (candela)

@@ -5,7 +5,12 @@ from labtex.unit import Unit
 from labtex.unit import factorandbasedims
 
 class Measurement:
-    "Base Class for all single valued measurements with uncertainties and SI units."
+    """Base Class for all single valued measurements with uncertainties and SI units.
+    To instantiate use `Measurement(value, uncertainty, unit)`. For example,
+    >>> x = Measurement(1.234, 0.01, "m")
+    >>> print(x)
+    1.23 ± 0.01 m
+    """
     def __init__(self, value: float, uncertainty: float = 0, unit: Union[Unit,str] = ""):
         "Create a measurement with a value, uncertainty and SI Unit."
         self.value = value
@@ -61,6 +66,8 @@ class Measurement:
                 self.uncertainty,
                 self.unit
             )
+        if(isinstance(obj,list)):
+            raise Exception("Cannot add a Measurement to a list. Convert list to MeasurementList first.")
         else:
             return NotImplemented
     
@@ -106,6 +113,8 @@ class Measurement:
                 self.uncertainty * abs(obj),
                 self.unit
             )
+        if(isinstance(obj,list)):
+            raise Exception("Cannot multiply a Measurement by a list. Convert list to MeasurementList first.")
         else:
             return NotImplemented
             
@@ -137,6 +146,8 @@ class Measurement:
                 self.uncertainty / abs(obj),
                 self.unit
             )
+        if(isinstance(obj,list)):
+            raise Exception("Cannot multiply a Measurement by a list. Convert list to MeasurementList first.")
         else:
             return NotImplemented
 

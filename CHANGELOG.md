@@ -6,6 +6,12 @@
 - Numpy input integration
 - Interface with statistical packages for non-linear regression
 
+# v0.6.0
+- Reworked the document object to be more versatile and to allow live editing of the document
+- Added numpy integration for instantiating MeasurementLists
+- Added nonlinear regression
+- Added parameter estimation region visualisation to plotting
+- Improved unittesting
 # v0.5.0
 - New extensive ![Documentation](https://www.cianlm.dev/labtex)! Examples and guides to be added in future updates.
 - Improved plot appearance with latex-style font

@@ -73,6 +73,21 @@ class TestMeasurementListClass(unittest.TestCase):
         with self.assertRaises(Exception):
             Measurement.sin(heights)
 
+    def test_numpy_instantiation(self):
+        import numpy as np
+        # variable uncertainty
+        heights = MeasurementList(np.array([185,183,182,194,184,177]),np.array([5,4,5,6,7,10]),"cm")
+        self.assertEqual(
+            repr(heights), "[185 ± 5, 183 ± 4, 182 ± 5, 194 ± 6, 184 ± 7, (18 ± 1) × 10^{1}] cm"
+        )
+        # fixed uncertainty
+        heights = MeasurementList(np.array([185,183,182,194,184,177]),5,"cm")
+        self.assertEqual(
+            repr(heights), "[185 ± 5, 183 ± 5, 182 ± 5, 194 ± 5, 184 ± 5, 177 ± 5] cm"
+        )
+
+
+
 #Measurement and MeasurementList Interactions 
 t = Measurement(5,0.1,"cm")
 

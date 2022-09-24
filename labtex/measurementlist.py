@@ -1,26 +1,26 @@
 import math
 from numbers import Number
 from typing import List, Union
+from collections.abc import Iterable
 from numpy import array
 
 from labtex.unit import Unit
 from labtex.measurement import Measurement
-
 class MeasurementList:
     """An extension of the measurement class to take list values. Can be instantiated in a number of ways:
     - Using lists for the values and the uncertainty
     
-    `>>> MeasurementList([1,2,3],[0.1,0.2,0.3],"m")`
+    >>> MeasurementList([1,2,3],[0.1,0.2,0.3],"m")
 
     - Using lists for the values and a single uncertainty for all measurements
 
-    `>>> MeasurementList([1,2,3],0.1,"m")`
+    >>> MeasurementList([1,2,3],0.1,"m")
 
     - Using A list of `Measurement` instances
 
-    `>>> MeasurementList( 
-     ... [Measurement(1,0.1,"m"),Measurement(2,0.2,"m"),Measurement(3,0.3,"m")]
-     ... )`
+    >>> MeasurementList( 
+    ... [Measurement(1,0.1,"m"),Measurement(2,0.2,"m"),Measurement(3,0.3,"m")]
+    ... )
     """
     def __init__(self,measurements: Union[List[Number],List[Measurement]], uncertainty: Union[Number,List] = math.nan, unit: Union[Unit,str] = ""):
         
@@ -32,10 +32,12 @@ class MeasurementList:
                 raise Exception("MeasurementList Error: All measurements in a MeasurementList must have the same units.")
         
         elif (all(isinstance(value,Number) for value in measurements)):
-            uncertainty = uncertainty if isinstance(uncertainty,List) else [uncertainty] * len(measurements)
+            uncertainty = uncertainty if isinstance(uncertainty,Iterable) else [uncertainty] * len(measurements)
             self.unit = unit if (isinstance(unit,Unit)) else Unit(unit)
             self.measurements = array([Measurement(value,uncertainty[i],self.unit) for i,value in enumerate(measurements)])
 
+        else:
+            raise Exception("MeasurementList Error: MeasurementList must be instantiated with a list of Measurements or a list of Numbers.")
     def __repr__(self):
         "Print string with sigfigs up to uncertainty."            
         return f"[{', '.join([str(measurement)[:-(len(str(self.unit)) + 1)] for measurement in self])}] {self.unit}"
@@ -83,12 +85,11 @@ class MeasurementList:
     def uncertainties(self):
         return [measurement.uncertainty for measurement in self]
     
-    # mutating
     def concat(self,obj):
         "Non-mutating concatenation of a Measurement/MeasurementList to the current MeasurementList."
         if(isinstance(obj,MeasurementList)):
             if(self.unit == obj.unit):
-                return  MeasurementList([*[measurement for measurement in self], *[measurement for measurement in obj]])
+                return MeasurementList([*[measurement for measurement in self], *[measurement for measurement in obj]])
             else:
                 raise Exception("MeasurementList Error: Cannot append two MeasurementLists with different units.")
         elif(isinstance(obj,Measurement)):
@@ -108,7 +109,7 @@ class MeasurementList:
                     [measurement + obj[i] for i,measurement in enumerate(self)]
                 )
             else:
-                raise Exception(f"MeasurementList Error: Cannot add two MeasurementLists with different lengths: {len(self)} =/= {len(obj)}. If you want to append them use .append().")
+                raise Exception(f"MeasurementList Error: Cannot add two MeasurementLists with different lengths: {len(self)} =/= {len(obj)}. If you want to concatenate them use .concat().")
         else:
             return MeasurementList(
                 [measurement + obj for measurement in self]
@@ -136,7 +137,7 @@ class MeasurementList:
                     [measurement * obj[i] for i,measurement in enumerate(self)]
                 )
             else:
-                raise Exception(f"MeasurementList Error: Cannot multiply two MeasurementLists with different lengths: {len(self)} =/= {len(obj)}. If you want to append them use .append().")
+                raise Exception(f"MeasurementList Error: Cannot multiply two MeasurementLists with different lengths: {len(self)} =/= {len(obj)}. If you want to concatenate them use .concat(), or if you want to multiply elementwise then use iterators.")
         else:
             return MeasurementList(
                 [measurement * obj for measurement in self]
@@ -153,7 +154,7 @@ class MeasurementList:
                     [measurement / obj[i] for i,measurement in enumerate(self)]
                 )
             else:
-                raise Exception(f"MeasurementList Error: Cannot divide two MeasurementLists with different lengths: {len(self)} =/= {len(obj)}. If you want to append them use .append().")
+                raise Exception(f"MeasurementList Error: Cannot divide two MeasurementLists with different lengths: {len(self)} =/= {len(obj)}.")
         else:
             return MeasurementList(
                 [measurement / obj for measurement in self]

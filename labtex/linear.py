@@ -1,3 +1,4 @@
+from typing import Iterable, Union
 from labtex.measurement import Measurement
 from labtex.measurementlist import MeasurementList
 
@@ -51,7 +52,10 @@ class LinearRegression:
     def __repr__(self):
         return f"m = {self.lobf['m']}\nc = {self.lobf['c']}"
 
-    def plot(self, title: str = "", xnameandsymbol : str = "", ynameandsymbol: str = "", showline : bool = True, graphnumber : int = 0, *args, **kwargs):
+    def predict(self, x : Union[Measurement,Iterable]):
+        return self.lobf["m"] * x + self.lobf["c"]
+
+    def plot(self, title: str = "", xlabel : str = "", ylabel: str = "", showline : bool = True, graphnumber : int = 0, *args, **kwargs):
         plt.figure(graphnumber)
         plt.errorbar(self.x.values(),self.y.values(), yerr = self.y.uncertainties(),fmt='o', *args, **kwargs)
         plt.autoscale(enable=True, axis='x', tight=True)
@@ -66,6 +70,6 @@ class LinearRegression:
              alpha=0.2
             )
         plt.title(title)
-        plt.xlabel(xnameandsymbol + f"{', ($ ' + str(self.x.unit) + '$)' if self.x.unit != '' else ''}")
-        plt.ylabel(ynameandsymbol + f"{', ($ ' + str(self.y.unit) + '$)' if self.y.unit != '' else ''}")
+        plt.xlabel(xlabel + f"{', ($ ' + str(self.x.unit) + '$)' if self.x.unit != '' else ''}")
+        plt.ylabel(ylabel + f"{', ($ ' + str(self.y.unit) + '$)' if self.y.unit != '' else ''}")
         return plt
