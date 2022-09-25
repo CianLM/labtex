@@ -9,12 +9,15 @@ import hashlib
 import os
 
 from labtex.nonlinear import NonLinearRegression
+from matplotlib.pyplot import Figure
 
 class Document:
     "A class for LaTeX template document creation with tables and graphs already inserted."
         # Customise these folders and the templates as you wish.
     texfolder = "tex/"
     graphfolder = "figures/"
+    tablemarker = "%labtex-tables"
+    figuremarker = "%labtex-figures"
 
     template = r"""\documentclass[]{article}
 
@@ -39,11 +42,11 @@ class Document:
 
 \section{Results}
 !table
-%labtex-tables
+!tablemarker
 
 \section{Data Analysis and Discussion}
 !graph
-%labtex-figures
+!figuremarker
 
 \section{Conclusion}
 
@@ -71,7 +74,7 @@ r"""\begin{table}[ht]!regex
         "default": r"""
 \begin{figure}[ht]!regex
     \centering
-    \includegraphics[width=!width\textwidth]{!filename.png}
+    \includegraphics[width=!width\textwidth]{!filename}
     \caption{!caption}
     \label{fig:!label}
 \end{figure}!graph"""
@@ -79,10 +82,10 @@ r"""\begin{table}[ht]!regex
     
     def __init__(self, title : str, author : str, filename : str = "labdocument", silent : bool = False):
         "Initialise a LaTeX document with an title and an author."
-        if os.path.exists(Document.texfolder + filename + ".tex"):
-            self.document = open(Document.texfolder + filename + ".tex").read()
+        if os.path.exists(Document.texfolder + filename):
+            self.document = open(Document.texfolder + filename).read()
         else:
-            self.document = Document.template.replace("!title",title).replace("!author",author)
+            self.document = Document.template.replace("!title",title).replace("!author",author).replace("!tablemarker",Document.tablemarker).replace("!figuremarker",Document.figuremarker)
                 # print("labtex: Overwriting existing file.")
         self.filename = filename
         self.tablenumber = 0
@@ -90,6 +93,9 @@ r"""\begin{table}[ht]!regex
         self.silent = silent
         self.hashes = []
         self.unchanged_environments = {'tables': 0, 'figures': 0}
+        
+
+
 
     def __repr__(self):
         return self.document
@@ -115,13 +121,14 @@ r"""\begin{table}[ht]!regex
             not self.silent and print("labtex: Updating table " + id_str)
             self.document = self.document.replace('\\' + match.group(0), table_code)
         else:
-            key = '%labtex-tables'
+            key = Document.tablemarker
             not self.silent and print("labtex: Adding table " + id_str)
             if self.document.find(key) != -1:
                 self.document = self.document.replace(key,'\n' + table_code + '\n' + key)
             else:
                 self.document = self.document.replace('\\end{document}', '\n' + table_code + '\n' + '\\end{document}')
 
+    # Called by add_table to generate the LaTeX code for the table
     def table_code(self,nameandsymbols : List[str], data : List[MeasurementList], \
         headers :List[str] = [], caption : str = "", label : str = "", style : str = "sideways"):
 
@@ -185,19 +192,23 @@ r"""\begin{table}[ht]!regex
         # self.document = self.document.replace("!table",table)
         return table
 
-    def add_figure(self, data : List[MeasurementList], title : str = "", xlabel : str = "Name, Symbol", \
-        ylabel : str = "Name, Symbol", caption : str = "", label : str = "", width : float = 0.8, style : str = "default", \
-        showline : bool = True, nonlinear_func : any = None, nonlinear_params : List[str] = [], \
-        *args, **kwargs):
+    def add_figure(self, fig : Figure, caption : str = "", label : str = "", width : float = 0.8, filename = ""):
         "Add figure to the LaTeX document."
-        hash_str = hashlib.sha1(str(data).encode("utf-8")).hexdigest()[:5]
-        # id_str = f'%labtex-table-{self.tablenumber + 1}-{hash_str}'
+        
+        # Save figure to file
+        if fig is not None:
+            if (not os.path.exists(Document.graphfolder)):
+                os.makedirs(Document.graphfolder)
+            filename = f"graph{self.graphnumber + 1}.png" if not filename else filename
+            fig.savefig(Document.graphfolder + filename)
+            not self.silent and print(f"labtex: Wrote to '{Document.graphfolder + filename}'.")
+
         id_str = f'%labtex-figure-{self.graphnumber + 1}'
         regex = re.compile('begin\{figure\}\[[\w]{0,2}\]' + id_str + '.*?end{figure}', re.DOTALL)
 
         self.hashes += [id_str]
         match = re.search(regex,self.document)
-        figure_code = self.figure_code(data,title,xlabel,ylabel,caption,label,width,style,showline,nonlinear_func,nonlinear_params,*args,**kwargs).strip()
+        figure_code = self.figure_code(caption,label,width,filename).strip()
         if match: # Replace figure
             if (('\\' + match.group(0)) == figure_code.replace('!graph','')):
                 # not self.silent and print("labtex: Figure code unchanged.")
@@ -207,7 +218,7 @@ r"""\begin{table}[ht]!regex
             not self.silent and print("labtex: Updating figure " + id_str)
             self.document = self.document.replace('\\' + match.group(0), figure_code)
         else:
-            key = '%labtex-figures'
+            key = Document.figuremarker
             print("labtex: Adding figure " + id_str)
             if self.document.find(key) != -1:
                 self.document = self.document.replace(key,'\n' + figure_code + '\n' + key)
@@ -215,12 +226,9 @@ r"""\begin{table}[ht]!regex
                 self.document = self.document.replace('\\end{document}', '\n' + figure_code + '\n' + '\\end{document}')
 
         
-
-    def figure_code(self, data : List[MeasurementList], title : str = "", xlabel : str = "Name, Symbol", \
-        ylabel : str = "Name, Symbol", caption : str = "",label : str = "", width : float = 0.8, style : str = "default", \
-        showline : bool = True, nonlinear_func : any = None, nonlinear_params : List[str] = [], \
-        *args, **kwargs):
-        graph = Document.graphtemplates[style]
+    # Called by add_figure to generate the latex code for the figure
+    def figure_code(self, caption : str = "", label : str = "", width : float = 0.8, filename = ""):
+        graph = Document.graphtemplates['default']
         self.graphnumber += 1
         # graph = graph.replace("!regex",f'%labtex-graph-{self.graphnumber}-{hashlib.sha1(str(data).encode("utf-8")).hexdigest()[:5]}')
         graph = graph.replace("!regex",f'%labtex-figure-{self.graphnumber}')
@@ -228,36 +236,22 @@ r"""\begin{table}[ht]!regex
         graph = graph.replace("!caption",caption)
         graph = graph.replace("!width",str(width))
 
-        if len(data) != 2 or not all(
-            isinstance(listitem, MeasurementList) for listitem in data
-        ):
-            raise Exception("2 MeasurementLists needed for graphing.")
-
-        eq = NonLinearRegression(nonlinear_func,*data,nonlinear_params) if nonlinear_func else LinearRegression(*data)
-        filename = f"graph{self.graphnumber}"
-
+        filename = f"graph{self.graphnumber}" if not filename else filename
         if(Document.graphfolder != '.'): # assuming the graph folder is a subfolder
             graph = graph.replace("!filename","../" + Document.graphfolder +  filename)
         else:
             graph = graph.replace("!filename", Document.graphfolder + filename)
 
-        if (not os.path.exists(Document.graphfolder)):
-            os.makedirs(Document.graphfolder)
-        plt = eq.plot(title,xlabel,ylabel,showline,self.graphnumber,*args, **kwargs)
-        plt.savefig(Document.graphfolder + filename)
-
-        not self.silent and print(f"labtex: Wrote to '{Document.graphfolder + filename}.png'.")
-                # remove lines with only spaces i.e. '\n    \n' but not '\n\n'
         return graph
 
     def save(self, overwrite: bool = False):
-        "Save the document to 'filename.tex'."
+        "Save the document to 'filename'."
         # Compile the tex file to check for errors
         if os.path.exists(Document.texfolder + self.filename):
             try:
-                not self.silent and print(f"labtex: Compiling '{Document.texfolder + self.filename}.tex' to check for errors.")
+                not self.silent and print(f"labtex: Compiling '{Document.texfolder + self.filename}' to check for errors.")
                 subprocess.run(
-                    ["pdflatex", "-halt-on-error", self.filename + ".tex"],
+                    ["pdflatex", "-halt-on-error", self.filename],
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
                     cwd=Document.texfolder,
@@ -267,19 +261,19 @@ r"""\begin{table}[ht]!regex
                 )
             except:
                 raise Exception("labtex: File failed to compile prior to saving. Save cancelled.")
-
+        else:
+            not self.silent and print(f"labtex: File '{Document.texfolder + self.filename}' does not exist. Creating new file.")
         # Remove tables and graphs that are not in the document
         # id_str = '(%labtex-table-\w{1,2}-\w{5})'
         id_str = '(%labtex-(?:table|figure)-\w{1,2})'
-        regex = re.compile('begin\{(table|figure)\}\[[\w]{0,2}\]' + id_str + '.*?end{(?:table|figure)}', re.DOTALL)
+        regex = re.compile('(begin\{(table|figure)\}\[[\w]{0,2}\]' + id_str + '.*?end{(?:table|figure)})', re.DOTALL)
         match_all = regex.findall(self.document)
-        # print(self.table_hashes)
-        # print(regex)
-        for match, id_str in match_all:
-            # print('match', match)
+        # print(self.hashes)
+        # print(len(match_all))
+        for match, tof, id_str in match_all: # tof stands for 'table or figure'
             if id_str not in self.hashes:
                 self.document = self.document.replace('\\' + match + '\n', '')
-                print('Removing', id_str)
+                not self.silent and print('labtex: Removing', id_str)
 
         # Display number of unchanged environments
         if not self.silent:
@@ -291,15 +285,15 @@ r"""\begin{table}[ht]!regex
         if(not os.path.exists(Document.texfolder)):
             not self.silent and print("labtex: Creating folder '" + Document.texfolder + "'.")
             os.makedirs(Document.texfolder)
-        if(os.path.exists(Document.texfolder + self.filename + ".tex")):
-            not self.silent and print(f"labtex: '{Document.texfolder + self.filename}.tex' already exists. { 'Overwriting.' if overwrite else 'Use `save(...,overwrite=True)` to overwrite.'}")
+        if(os.path.exists(Document.texfolder + self.filename)):
+            not self.silent and print(f"labtex: '{Document.texfolder + self.filename}' already exists. { 'Overwriting.' if overwrite else 'Use `save(...,overwrite=True)` to overwrite.'}")
             if(not overwrite):
                 return
 
-        with open(Document.texfolder + self.filename + '.tex','w') as outputfile:
+        with open(Document.texfolder + self.filename,'w') as outputfile:
             outputfile.write(self.document)
 
-        not self.silent and print(f"labtex: Wrote to '{Document.texfolder + self.filename}.tex'.")
+        not self.silent and print(f"labtex: Wrote to '{Document.texfolder + self.filename}'.")
 
 # Update document procedure:
 # 1. For each table/graph call:

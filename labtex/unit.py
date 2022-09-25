@@ -114,7 +114,9 @@ class Unit:
 
     @staticmethod
     def unitless(self):
-        return all([ dim['power'] == 0 for dim in self.units.values() ])
+        # return all([ dim['power'] == 0 for dim in self.units.values() ])
+        factor, baseDims = factorandbasedims(self)
+        return all([ dim == 0 for dim in baseDims.values() ])
 
     @staticmethod
     def singular(self): # a unit with a single dimension

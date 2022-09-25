@@ -55,15 +55,17 @@ class LinearRegression:
     def predict(self, x : Union[Measurement,Iterable]):
         return self.lobf["m"] * x + self.lobf["c"]
 
-    def plot(self, title: str = "", xlabel : str = "", ylabel: str = "", showline : bool = True, graphnumber : int = 0, *args, **kwargs):
-        plt.figure(graphnumber)
+    def plot(self, xlabel : str = "", ylabel: str = "", title: str = "", showline : bool = True, showfill : bool = True, fig_number : int = None, *args, **kwargs):
+        fig = plt.figure(fig_number)
         plt.errorbar(self.x.values(),self.y.values(), yerr = self.y.uncertainties(),fmt='o', *args, **kwargs)
         plt.autoscale(enable=True, axis='x', tight=True)
+
+        xvals = self.x.values()
+        rangex = max(xvals) - min(xvals)
+        xspace = linspace(min(xvals) - 0.1 * rangex, max(xvals) + 0.1 * rangex, 100)
         if showline:
-            xvals = self.x.values()
-            rangex = max(xvals) - min(xvals)
-            xspace = linspace(min(xvals) - 0.1 * rangex, max(xvals) + 0.1 * rangex, 100)
             plt.plot(xspace, xspace * self.lobf["m"].value + self.lobf["c"].value, label = "Predicted")
+        if showfill:
             plt.fill_between(xspace,
              xspace * (self.lobf["m"].value + self.lobf["m"].uncertainty * (1 - 2 *(xspace < 0)) ) + self.lobf["c"].value + self.lobf["c"].uncertainty,
              xspace * (self.lobf["m"].value - self.lobf["m"].uncertainty * (1 - 2 * (xspace < 0)) ) + self.lobf["c"].value - self.lobf["c"].uncertainty,
@@ -72,4 +74,4 @@ class LinearRegression:
         plt.title(title)
         plt.xlabel(xlabel + f"{', ($ ' + str(self.x.unit) + '$)' if self.x.unit != '' else ''}")
         plt.ylabel(ylabel + f"{', ($ ' + str(self.y.unit) + '$)' if self.y.unit != '' else ''}")
-        return plt
+        return fig

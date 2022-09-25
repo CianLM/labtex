@@ -22,6 +22,8 @@ plt.rcParams.update({
     "legend.framealpha": 1.0,
     # resolution
     "figure.dpi" : 300,
+    # error bars
+    # "errorbar.capsize": 3,
 })
 
 class NonLinearRegression:
@@ -40,21 +42,20 @@ class NonLinearRegression:
     def __repr__(self):
         return f"Optimal parameters: {self.optimal_params}\nUncertainties: {self.param_uncertainties}"
 
-    def plot(self, title: str = "", xnameandsymbol : str = "", ynameandsymbol: str = "", showline : bool = True, graphnumber : int = 0, *args, **kwargs):
+    def plot(self, title: str = "", xlabel : str = "", ylabel: str = "", showline : bool = True, showfill : bool = True, fig_number : int = None, *args, **kwargs):
         xvals = self.x.values()
         yvals = self.y.values()
-        plt.figure(graphnumber)
-        plt.errorbar(xvals, yvals, yerr = self.y.uncertainties(),fmt='o',*args, **kwargs)
+        fig = plt.figure(fig_number)
+        plt.errorbar(xvals, yvals, yerr = self.y.uncertainties(), fmt='o',*args, **kwargs)
         plt.autoscale(enable=True, axis='x', tight=True)
+        # extend +- 10% of the range
+        rangex = max(xvals) - min(xvals)
+        xspace = linspace(min(xvals) - 0.1 * rangex, max(xvals) + 0.1 * rangex, 100)
         if showline:
-            # extend +- 10% of the range
-            rangex = max(xvals) - min(xvals)
-            xspace = linspace(min(xvals) - 0.1 * rangex, max(xvals) + 0.1 * rangex, 100)
             plt.plot(xspace, [
                 self.func(x, *self.optimal_params) for x in xspace
                 ], label="Predicted")
-            # minyspace = [self.func(x, *(self.optimal_params - self.param_uncertainties)) for x in xspace]
-            # maxyspace = [self.func(x, *(self.optimal_params + self.param_uncertainties)) for x in xspace]
+        if showfill:
             # minimize over all 2**n combinations of the optimal parameters instead
             minyspace = [
                 min([ 
@@ -75,6 +76,6 @@ class NonLinearRegression:
             plt.fill_between(xspace, minyspace, maxyspace, alpha=0.2, label='Uncertainty')
         
         plt.title(title)
-        plt.xlabel(xnameandsymbol + f"{', ($ ' + str(self.x.unit) + '$)' if self.x.unit != '' else ''}")
-        plt.ylabel(ynameandsymbol + f"{', ($ ' + str(self.y.unit) + '$)' if self.y.unit != '' else ''}")
-        return plt
+        plt.xlabel(xlabel + f"{', ($ ' + str(self.x.unit) + '$)' if self.x.unit != '' else ''}")
+        plt.ylabel(ylabel + f"{', ($ ' + str(self.y.unit) + '$)' if self.y.unit != '' else ''}")
+        return fig
