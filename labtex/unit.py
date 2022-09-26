@@ -137,14 +137,6 @@ class Unit:
         Unit.derivedUnits[symbol] = [SI_equivalent, constant_factor]
         Unit.knownUnits += [symbol]
 
-
-
-    # def __eq__(self,obj):
-    #     "Check if two Units are the same."
-    #     if (isinstance(obj,Unit)):
-    #         return all(self.units[unit] == obj.units[unit] for unit in Unit.knownUnits)
-    #     return False
-
     def __eq__(self, obj):
         "Check if two Units are the same."
         obj = obj if isinstance(obj,Unit) else Unit(obj)

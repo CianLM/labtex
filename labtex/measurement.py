@@ -1,3 +1,4 @@
+import copy
 import math
 from numbers import Number
 from typing import Union
@@ -56,8 +57,12 @@ class Measurement:
                     math.hypot(self.uncertainty,obj.uncertainty),
                     self.unit
             )
+            factor1, basedims1 = factorandbasedims(self.unit)
+            factor2, basedims2 = factorandbasedims(obj.unit)
+            if(basedims1 == basedims2):
+                return self + obj.to(self.unit)
             else:
-                raise Exception("Cannot add measurements with different units.")
+                raise Exception(f"Cannot add measurements with different units: {self.unit} and {obj.unit}")
 
         # For a constant with no uncertainty
         if(isinstance(obj,Number)):
@@ -101,10 +106,20 @@ class Measurement:
         )
 
         if(isinstance(obj,Measurement)):
+            # If the unit objects share a dimension with different prefixes we need to convert
+            # Note this cannot be implemented in the unit class as it affects the measurement value
+            newobj = copy.deepcopy(obj)
+            for unit in Unit.knownUnits:
+                if (self.unit.units[unit]['power'] != 0 
+                    and obj.unit.units[unit]['power'] != 0
+                    and self.unit.units[unit]['prefix'] != obj.unit.units[unit]['prefix']):
+                    newobj.value *= (Unit.prefixes[obj.unit.units[unit]['prefix']] / Unit.prefixes[self.unit.units[unit]['prefix']])**obj.unit.units[unit]['power']
+                    newobj.unit.units[unit]['prefix'] = self.unit.units[unit]['prefix']
+                    newobj.relativeuncertainty = newobj.uncertainty / newobj.value
             return Measurement(
-                self.value * obj.value,
-                abs(self.value * obj.value) * math.hypot(self.relativeuncertainty, obj.relativeuncertainty),
-                self.unit * obj.unit
+                self.value * newobj.value,
+                abs(self.value * newobj.value) * math.hypot(self.relativeuncertainty, newobj.relativeuncertainty),
+                self.unit * newobj.unit
             )
 
         if(isinstance(obj,Number)):
@@ -134,10 +149,18 @@ class Measurement:
         )
 
         if(isinstance(obj,Measurement)):
+            newobj = copy.deepcopy(obj)
+            for unit in Unit.knownUnits:
+                if (self.unit.units[unit]['power'] != 0 
+                    and obj.unit.units[unit]['power'] != 0
+                    and self.unit.units[unit]['prefix'] != obj.unit.units[unit]['prefix']):
+                    newobj.value *= (Unit.prefixes[obj.unit.units[unit]['prefix']] / Unit.prefixes[self.unit.units[unit]['prefix']])**obj.unit.units[unit]['power']
+                    newobj.unit.units[unit]['prefix'] = self.unit.units[unit]['prefix']
+                    newobj.relativeuncertainty = newobj.uncertainty / newobj.value
             return Measurement(
-                self.value / obj.value,
-                abs(self.value / obj.value) * math.hypot(self.relativeuncertainty,obj.relativeuncertainty),
-                self.unit / obj.unit
+                self.value / newobj.value,
+                abs(self.value / newobj.value) * math.hypot(self.relativeuncertainty,newobj.relativeuncertainty),
+                self.unit / newobj.unit
             )
 
         if(isinstance(obj,Number)):
