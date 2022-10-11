@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 # Two MeasurementLists to be used in the rest of the tests
 voltages = MeasurementList([1.3,3,5,7,8.5,10],1,"V")
 temperatures = MeasurementList([23,55,67,82,88,96],[5,3,7,10,5,6],"K")
+
 testset = MeasurementList([1.3,3,5,7,8.5,10],[1,1,2,1,1,1],"")
 # Linear Regression
 eq = LinearRegression(voltages,temperatures)
@@ -15,7 +16,7 @@ eq = LinearRegression(voltages,temperatures)
 def func(x,A,B):
     return A*x**0.5 + B
 
-sqeq = NonLinearRegression(func,voltages,temperatures)
+sqeq = NonlinearRegression(func,voltages,temperatures)
 # plot = sqeq.plot()
 # # plot.show()
 
@@ -41,7 +42,7 @@ class TestLinearRegression(unittest.TestCase):
 # plt.savefig("figures/rabi.png")
 # plt.show()
 
-class TestNonLinearRegression(unittest.TestCase):
+class TestNonlinearRegression(unittest.TestCase):
     def test_nlr_repr(self):
         self.assertEqual(
             sqeq.__repr__(), "Optimal parameters: [33.2759282  -6.89522347]\nUncertainties: [2.976448764153751, 6.462296108511657]"
@@ -52,19 +53,19 @@ class TestNonLinearRegression(unittest.TestCase):
 
 doc = Document(
     title = "Lab Report Template", author = "CianLM",
-    filename='test2.tex', silent=False
+    filename='test.tex', silent=False
 )
 
 doc.add_table(
-    nameandsymbols = ["Voltage, V","Temperature, T"],
+    nameandsymbols = ["Voltage, $V$","Temperature, $T$"],
     data = [voltages,temperatures],
     headers = ["Variables","Data"],
     caption = "Voltage and Temperature Correlation",
 )
 
 doc.add_table(
-    nameandsymbols = ["Voltage, V", "Temperatures", "Testset"],
-    data = [voltages,testset,testset],
+    nameandsymbols = ["Voltage, $V$", "Temperature, $T^2$"],
+    data = [voltages,temperatures**2,],
     caption = "Voltage and Temperature Squared Correlation",
     style = "upright"
 )
@@ -86,46 +87,45 @@ doc.add_table(
 # linear regression plot is a single axis plot. 
 
 linreg = LinearRegression(voltages,temperatures)
-fig = linreg.plot(xlabel="Voltage, V", ylabel="Temperature, T", title="Voltage and Temperature Plot")
+fig, ax = linreg.plot(xlabel="Voltage, V", ylabel="Temperature, T", title="Voltage and Temperature Plot")
 doc.add_figure(fig, caption="Linear Regression of Voltage and Temperature", label="vtr")
 
-sqrtreg = NonLinearRegression(func,voltages,temperatures)
-fig2 = sqrtreg.plot(xlabel="Voltage, V", ylabel="Square Root of Temperature, T$^{\\frac{1}{2}}$", title="Non-Linear ($\sqrt{x}$) Curve Fit Voltage and Temperature Plot")
+sqrtreg = NonlinearRegression(func,voltages,temperatures)
+fig2 = plt.figure()
+sqrtreg.plot(xlabel="Voltage, V", ylabel="Temperature, T", title="Non-Linear ($\sqrt{x}$) Curve Fit Voltage and Temperature Plot")
 doc.add_figure(fig2, caption="Non-linear ($\sqrt{x}$) Regression of Voltage and Temperature")
 
 squarereg = LinearRegression(voltages,temperatures**2)
-fig3 = squarereg.plot(xlabel="Voltage, V", ylabel="Temperature Squared, $T^2$", title="Voltage and Temperature Squared Plot")
+plt.figure()
+fig3, ax3 = squarereg.plot(xlabel="Voltage, V", ylabel="Temperature Squared, $T^2$", title="Voltage and Temperature Squared Plot")
 doc.add_figure(fig3, caption="Linear Regression of Voltage and Temperature Squared")
 
 dt = 0.01
 t = ML(np.arange(0, 30, dt),dt/2,"s")
-nse1 = ML(np.random.randn(len(t)),0,'')                 # white noise 1
-nse2 = ML(np.random.randn(len(t)) ,0,'')                # white noise 2
+nse1 = 0.1*ML(np.random.randn(len(t)),0,'')                 # white noise 1
+nse2 = 0.1*ML(np.random.randn(len(t)) ,0,'')                # white noise 2
 
 # # Two signals with a coherent part at 10Hz and a random part
-omega_t = M(2 * np.pi * 10,0,"Hz") * t
-omega_t = omega_t.to('')
+omega = M(2 * np.pi * 10,0,"s^-1")
 
-s1 = ML.sin(omega_t) + nse1
-s2 = ML.sin(omega_t) + nse2
+s1 = ML.sin(omega * t) + nse1
+s2 = ML.sin(omega * (t + dt/2)) + nse2
+nlr = NonlinearRegression(lambda x,a: np.sin(2 * np.pi * a * x),t[:20],s1[:20],init_params=[8])
+nlr2 = NonlinearRegression(lambda x,a: np.sin(2 * np.pi * a * x),t[:20]+dt/2,s2[:20],init_params=[8])
+print(nlr.optimal_params)
 
 fig, axs = plt.subplots(2, 1)
-axs[0].plot(t.values(), s1.values(), t.values(), s2.values())
-axs[0].set_xlim(0, 2)
-axs[0].set_xlabel('time')
-axs[0].set_ylabel('s1 and s2')
-axs[0].grid(True)
+nlr_fig, _ = nlr.plot(axs[0], xlabel="Time, $s$", ylabel="Signal", label="Series 1")
+nlr_fig2, _ = nlr2.plot(axs[0], label="Series 2", showfill=False,showline=False) #, color='maroon'
+fig.legend()
 
-cxy, f = axs[1].cohere(s1.values(), s2.values(), 256, 1. / dt)
-axs[1].set_ylabel('coherence')
-
+axs[1].cohere(s1.values(), s2.values(), 256, 1 / dt, label="Coherence")
+axs[1].set_xlabel('Frequency, $f$ (Hz)')
+axs[1].set_ylabel('Spectral Density')
+axs[1].legend()
 fig.tight_layout()
 
-doc.add_figure(fig, caption="Two signals with a coherent part at 10Hz and a random part")
-
-
-
-
+doc.add_figure(fig, caption="Non-linear Regression of Noisy Sinusoid",filename="coherence.png")
 
 
 doc.save(overwrite=True)

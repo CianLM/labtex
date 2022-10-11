@@ -1,4 +1,5 @@
 import math
+import re
 from numbers import Number
 from typing import List, Union
 from collections.abc import Iterable
@@ -51,7 +52,7 @@ class MeasurementList:
             sigdigits = -math.floor(math.log10(round(self.measurements[0].uncertainty,sigdigits)))
             if(sigdigits > 0):
                 if(not nounits):
-                    tableprint += f", ($\\pm {round(self.measurements[0].uncertainty,sigdigits)}$ {self.unit})"
+                    tableprint += f", ($\\pm {round(self.measurements[0].uncertainty,sigdigits)}$ {Unit.latex(self.unit)})"
                 if(not novalues):
                     tableprint += f"& { r' & '.join([str(round(measurement.value,sigdigits)) for measurement in self ] ) }"
             else: # remove decimal points from the float data type
@@ -61,7 +62,8 @@ class MeasurementList:
                     tableprint += f"& { r' & '.join([ str(round(round(measurement.value),sigdigits)) for measurement in self ] ) }"
         else:
             if(not nounits):
-                tableprint += f", ({self.unit}) " if not Unit.unitless(self.unit) else ""
+                # power = re.compile('(\^\-?\d+)')
+                tableprint += f", ({Unit.latex(self.unit)}) " if not Unit.unitless(self.unit) else ""
             if(not novalues):
                 if(len(str(self.unit)) == 0): # 0 breaks python indexing
                     tableprint += f"& ${ r'$ & $'.join([str(measurement) for measurement in self ] ) }$"
@@ -74,7 +76,13 @@ class MeasurementList:
         return len(self.measurements)
 
     def __getitem__(self,item):
-        return self.measurements[item]
+        # item can be a slice or an index/int
+        # if its an index, return a measurement
+        if (isinstance(item,int)):
+            return self.measurements[item]
+        # if its a slice, return a measurementlist
+        elif (isinstance(item,slice)):
+            return MeasurementList(self.measurements[item])
 
     def __iter__(self):
         yield from self.measurements

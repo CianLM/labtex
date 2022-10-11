@@ -191,6 +191,7 @@ You can then edit the generated `.tex` file freely, and run the python file agai
 
 By default, tables will be inserted after a line starting with `%labtex-tables` and figures will be inserted after a line starting with `%labtex-figures`. If you want to change the comments labtex looks for, you can edit the `Document.tablemarker` and `Document.figuremarker` attributes respectively. If such comments are not found, tables/figures will be inserted at the very end of the document. 
 
+For more advanced usage and guides (such as the creation of the plot below) see the [Documentation](https://www.cianlm.dev/labtex).
 
 ## Contributions
 

@@ -8,14 +8,14 @@ from typing import Any, List, Union
 import hashlib
 import os
 
-from labtex.nonlinear import NonLinearRegression
+from labtex.nonlinear import NonlinearRegression
 from matplotlib.pyplot import Figure
 
 class Document:
     "A class for LaTeX template document creation with tables and graphs already inserted."
         # Customise these folders and the templates as you wish.
     texfolder = "tex/"
-    graphfolder = "figures/"
+    figurefolder = "figures/"
     tablemarker = "%labtex-tables"
     figuremarker = "%labtex-figures"
 
@@ -93,9 +93,6 @@ r"""\begin{table}[ht]!regex
         self.silent = silent
         self.hashes = []
         self.unchanged_environments = {'tables': 0, 'figures': 0}
-        
-
-
 
     def __repr__(self):
         return self.document
@@ -152,7 +149,7 @@ r"""\begin{table}[ht]!regex
         if(style == "sideways"):
             # table = table.replace("!columns", "*{" + str(1+columns) + "}c" )
             table = table.replace("!columns", f"c|{ 'c' * columns}" )
-            if(headers != []):
+            if(headers != [] and len(headers) >= 2):
                 table = table.replace("!data",
                 fr"""{headers[0]} & \multicolumn{{{columns}}}{{c}}{{{headers[1]}}} \\
             \midrule !data"""
@@ -197,11 +194,11 @@ r"""\begin{table}[ht]!regex
         
         # Save figure to file
         if fig is not None:
-            if (not os.path.exists(Document.graphfolder)):
-                os.makedirs(Document.graphfolder)
+            if (not os.path.exists(Document.figurefolder)):
+                os.makedirs(Document.figurefolder)
             filename = f"graph{self.graphnumber + 1}.png" if not filename else filename
-            fig.savefig(Document.graphfolder + filename)
-            not self.silent and print(f"labtex: Wrote to '{Document.graphfolder + filename}'.")
+            fig.savefig(Document.figurefolder + filename)
+            not self.silent and print(f"labtex: Wrote to '{Document.figurefolder + filename}'.")
 
         id_str = f'%labtex-figure-{self.graphnumber + 1}'
         regex = re.compile('begin\{figure\}\[[\w]{0,2}\]' + id_str + '.*?end{figure}', re.DOTALL)
@@ -237,10 +234,10 @@ r"""\begin{table}[ht]!regex
         graph = graph.replace("!width",str(width))
 
         filename = f"graph{self.graphnumber}" if not filename else filename
-        if(Document.graphfolder != '.'): # assuming the graph folder is a subfolder
-            graph = graph.replace("!filename","../" + Document.graphfolder +  filename)
+        if(Document.figurefolder != '.'): # assuming the graph folder is a subfolder
+            graph = graph.replace("!filename","../" + Document.figurefolder +  filename)
         else:
-            graph = graph.replace("!filename", Document.graphfolder + filename)
+            graph = graph.replace("!filename", Document.figurefolder + filename)
 
         return graph
 

@@ -1,0 +1,15 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: "labtex"
+  version: {{ data.get('version') }}
+  
+about:
+  summary: {{ data.get('description') }}
+
+source:
+  path: ..
+
+build:
+  script: python setup.py install
+  noarch: python

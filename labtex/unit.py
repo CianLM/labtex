@@ -66,6 +66,19 @@ class Unit:
 
         return " ".join(unitoutput)
 
+    @staticmethod
+    def latex(self):
+        "Return a LaTeX representation of the Unit."
+        unitoutput = []
+        for unit in Unit.knownUnits:
+            if (self.units[unit]['power'] != 0):
+                if(self.units[unit]['power'] != 1):
+                    unitoutput.append(f"{self.units[unit]['prefix']}{unit}$^{self.units[unit]['power'] if self.units[unit]['power'] > 0 else '{' + str(self.units[unit]['power']) + '}'}$")
+                else:
+                    unitoutput.append(f"{self.units[unit]['prefix']}{unit}")
+
+        return " ".join(unitoutput)
+
     def parse(self,unitString):
         "Decompose string into its constituent SI units."
 
@@ -117,19 +130,6 @@ class Unit:
         # return all([ dim['power'] == 0 for dim in self.units.values() ])
         factor, baseDims = factorandbasedims(self)
         return all([ dim == 0 for dim in baseDims.values() ])
-
-    @staticmethod
-    def singular(self): # a unit with a single dimension
-        return sum([*map(lambda x: x['power'] != 0, self.units.values())]) == 1
-
-    @staticmethod
-    def singularunit(self):
-        if(Unit.singular(self)):
-            for unit in self.units.values():
-                if(unit["power"] != 0):
-                    return unit
-        else:
-            return False
 
     @staticmethod
     def addUnit(symbol : str, SI_equivalent : str, constant_factor : float = 1):

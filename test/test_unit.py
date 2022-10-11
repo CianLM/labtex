@@ -9,6 +9,8 @@ class TestUnitClass(unittest.TestCase):
     
     def test_prefixparsing(self):
         self.assertEqual(repr(Unit("um")), "um")
+        # using unicode \mu: 
+        self.assertEqual(repr(Unit("µm")), "µm")
 
     def test_mmparsing(self):
         self.assertEqual(repr(Unit("mm^2")), "mm^2")
@@ -17,7 +19,7 @@ class TestUnitClass(unittest.TestCase):
         self.assertEqual(repr(Unit("kgm^2 AJ^-10")), "J^{-10} m^2 kg A")
 
     def test_maxparsing(self):
-        self.assertEqual( 
+        self.assertEqual(
             repr(Unit("ng^-5us^-4mA^-3cK^-2C^-1kJ^1MV^2N^3GW^4T^5Pa^6Hzm^101")),
             "kJ MV^2 N^3 GW^4 T^5 Pa^6 Hz C^{-1} m^101 ng^{-5} us^{-4} mA^{-3} cK^{-2}"
     )
@@ -37,9 +39,6 @@ class TestUnitClass(unittest.TestCase):
     def test_methods(self):
         self.assertTrue(Unit.unitless(Unit("")))
         self.assertTrue(not Unit.unitless(Unit("m")))
-
-        self.assertTrue(Unit.singular(Unit("m^2")))
-        self.assertTrue(not Unit.singular(Unit("Vm")))
 
     def test_slash_parsing(self):
         self.assertEqual(repr(Unit("m /s")), "m s^{-1}")

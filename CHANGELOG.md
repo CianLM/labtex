@@ -8,6 +8,7 @@
 
 # v0.6.0
 - Reworked the document object to be more versatile and to allow live editing of the document
+- Improved generation of unit axis labelling
 - Added numpy integration for instantiating MeasurementLists
 - Added nonlinear regression
 - Added parameter estimation region visualisation to plotting

@@ -1,8 +1,10 @@
 from typing import Iterable, Union
+from labtex.unit import Unit
 from labtex.measurement import Measurement
 from labtex.measurementlist import MeasurementList
 
 import matplotlib.pyplot as plt 
+from matplotlib.axes import Axes
 from numpy import array, linspace
 
 # plt.style.use('seaborn-whitegrid')
@@ -55,23 +57,29 @@ class LinearRegression:
     def predict(self, x : Union[Measurement,Iterable]):
         return self.lobf["m"] * x + self.lobf["c"]
 
-    def plot(self, xlabel : str = "", ylabel: str = "", title: str = "", showline : bool = True, showfill : bool = True, fig_number : int = None, *args, **kwargs):
-        fig = plt.figure(fig_number)
-        plt.errorbar(self.x.values(),self.y.values(), yerr = self.y.uncertainties(),fmt='o', *args, **kwargs)
-        plt.autoscale(enable=True, axis='x', tight=True)
+    def plot(self, ax : Axes = None, xlabel : str = "", ylabel: str = "", title: str = "", showline : bool = True, showfill : bool = True, *args, **kwargs):
+        fig = plt.gcf()
+        if (ax is None):
+            ax = plt.gca()
+        else:
+            plt.sca(ax)
+
+        
+        ax.errorbar(self.x.values(),self.y.values(), yerr = self.y.uncertainties(),fmt='o', *args, **kwargs)
+        ax.autoscale(enable=True, axis='x', tight=True)
 
         xvals = self.x.values()
         rangex = max(xvals) - min(xvals)
-        xspace = linspace(min(xvals) - 0.1 * rangex, max(xvals) + 0.1 * rangex, 100)
+        xspace = linspace(min(xvals) - 0.1 * rangex, max(xvals) + 0.1 * rangex, 1000)
         if showline:
-            plt.plot(xspace, xspace * self.lobf["m"].value + self.lobf["c"].value, label = "Predicted")
+            ax.plot(xspace, xspace * self.lobf["m"].value + self.lobf["c"].value, label = "Predicted")
         if showfill:
-            plt.fill_between(xspace,
+            ax.fill_between(xspace,
              xspace * (self.lobf["m"].value + self.lobf["m"].uncertainty * (1 - 2 *(xspace < 0)) ) + self.lobf["c"].value + self.lobf["c"].uncertainty,
              xspace * (self.lobf["m"].value - self.lobf["m"].uncertainty * (1 - 2 * (xspace < 0)) ) + self.lobf["c"].value - self.lobf["c"].uncertainty,
              alpha=0.2
             )
-        plt.title(title)
-        plt.xlabel(xlabel + f"{', ($ ' + str(self.x.unit) + '$)' if self.x.unit != '' else ''}")
-        plt.ylabel(ylabel + f"{', ($ ' + str(self.y.unit) + '$)' if self.y.unit != '' else ''}")
-        return fig
+        title and plt.title(title)
+        xlabel and plt.xlabel(xlabel + f"{' (' + Unit.latex(self.x.unit) + ')' if self.x.unit != '' else ''}")
+        ylabel and plt.ylabel(ylabel + f"{' (' + Unit.latex(self.y.unit) + ')' if self.y.unit != '' else ''}")
+        return fig, ax
