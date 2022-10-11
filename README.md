@@ -193,6 +193,7 @@ By default, tables will be inserted after a line starting with `%labtex-tables` 
 
 For more advanced usage and guides (such as the creation of the plot below) see the [Documentation](https://www.cianlm.dev/labtex).
 
+![](https://github.com/CianLM/labtex/raw/master/figures/coherence.png)
 ## Contributions
 
 This package is under active development. Feel free to submit a pull request or reach out with feature suggestions.
