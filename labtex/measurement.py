@@ -301,7 +301,7 @@ class Measurement:
         if(Unit.unitless(x.unit)):
             return Measurement(
                 math.atan(x.value),
-                x.uncertainty / (math.sqrt(1 + x.value**2)),
+                x.uncertainty / (1 + x.value**2),
                 ""
             )
         else:

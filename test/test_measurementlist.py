@@ -65,7 +65,7 @@ class TestMeasurementListClass(unittest.TestCase):
             repr(MeasurementList.acos(heights/maxheight)), "[0.39 ± 0.09, 0.42 ± 0.08, 0.43 ± 0.08, 0.2 ± 0.2, 0.4 ± 0.1, 0.5 ± 0.1] "
         )
         self.assertEqual(
-            repr(MeasurementList.atan(heights/maxheight)), "[0.75 ± 0.03, 0.74 ± 0.02, 0.74 ± 0.03, 0.77 ± 0.03, 0.74 ± 0.03, 0.72 ± 0.04] "
+            repr(MeasurementList.atan(heights/maxheight)), "[0.75 ± 0.02, 0.74 ± 0.02, 0.74 ± 0.02, 0.77 ± 0.02, 0.74 ± 0.02, 0.72 ± 0.03] "
         )
     def test_exceptions(self):
         with self.assertRaises(Exception):

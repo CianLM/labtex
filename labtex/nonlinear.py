@@ -53,6 +53,12 @@ class NonlinearRegression:
     def __repr__(self):
         return f"Optimal parameters: {self.optimal_params}\nUncertainties: {self.param_uncertainties}"
 
+    def predict(self, x):
+        y = self.func(x, *self.optimal_params)
+        if isinstance(y, MeasurementList):
+            y.unit = self.y.unit
+        return y
+
     def plot(self, ax : Axes = None, title: str = "", xlabel : str = "", ylabel: str = "", showline : bool = True, showfill : bool = True, *args, **kwargs):
         xvals = self.x.values()
         yvals = self.y.values()

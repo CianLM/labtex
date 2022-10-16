@@ -55,7 +55,7 @@ class LinearRegression:
         return f"m = {self.lobf['m']}\nc = {self.lobf['c']}"
 
     def predict(self, x : Union[Measurement,Iterable]):
-        return self.lobf["m"] * x + self.lobf["c"]
+        return self.lobf["m"] * x + self.lobf["c"] if isinstance(x, Measurement) or isinstance(x, MeasurementList) else self.lobf["m"].value * x + self.lobf["c"].value
 
     def plot(self, ax : Axes = None, xlabel : str = "", ylabel: str = "", title: str = "", showline : bool = True, showfill : bool = True, *args, **kwargs):
         fig = plt.gcf()

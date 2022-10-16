@@ -7,4 +7,4 @@ from labtex.nonlinear import NonlinearRegression
 from labtex.document import Document
 
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'

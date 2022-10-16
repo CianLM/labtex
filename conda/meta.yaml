@@ -5,6 +5,8 @@ package:
   version: {{ data.get('version') }}
   
 about:
+  home: {{ data['url'] }}
+  license: {{ data['license'] }}
   summary: {{ data.get('description') }}
 
 source:
@@ -13,3 +15,16 @@ source:
 build:
   script: python setup.py install
   noarch: python
+
+requirements:
+  build:
+    - python
+    - numpy
+    - scipy
+    - matplotlib
+
+  run:
+    - python
+    - numpy
+    - scipy 
+    - matplotlib
