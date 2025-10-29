@@ -7,7 +7,7 @@ from matplotlib.axes import Axes
 from numpy import linspace
 from scipy.optimize import curve_fit
 
-plt.style.use('seaborn-muted')
+plt.style.use('seaborn-v0_8-muted')
 # seaborn-whitegrid
 # seaborn-muted
 # seaborn-dark-palette
