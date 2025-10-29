@@ -2,6 +2,7 @@
 [![](https://img.shields.io/badge/Documentation-007ec6.svg)](https://www.cianlm.dev/labtex)
 [![PyPI](https://img.shields.io/pypi/v/labtex)](https://pypi.org/project/labtex/)
 ![Tests](https://github.com/CianLM/labtex/actions/workflows/python-publish.yml/badge.svg)
+[![Downloads](https://static.pepy.tech/personalized-badge/labtex?period=total&units=international_system&left_color=blue&right_color=brightgreen&left_text=Downloads)](https://pepy.tech/project/labtex)
 ![License](https://img.shields.io/github/license/cianlm/labtex)
 
 New extensive [Documentation](https://www.cianlm.dev/labtex)!
